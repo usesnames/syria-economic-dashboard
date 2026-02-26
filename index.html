@@ -453,7 +453,7 @@
     }
 
     /* --- Load data and initialise --- */
-    fetch("data/cpi_data.json")
+    fetch("data/cpi_data.json?v=" + Date.now())
         .then(function (res) {
             if (!res.ok) throw new Error("Could not load data/cpi_data.json");
             return res.json();
