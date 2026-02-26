@@ -123,8 +123,8 @@
                 <div class="label">Last Monthly Change</div>
             </div>
             <div class="kpi-card">
-                <div class="value" id="kpi-peak">&mdash;</div>
-                <div class="label" id="kpi-peak-label">Peak CPI</div>
+                <div class="value" id="kpi-yoy">&mdash;</div>
+                <div class="label" id="kpi-yoy-label">YoY Inflation</div>
             </div>
             <div class="kpi-card">
                 <div class="value" id="kpi-total" style="color: #E53935">&mdash;</div>
@@ -187,9 +187,23 @@
 
         var latest = valid[valid.length - 1];
         var first  = valid[0];
-        var peak   = valid.reduce(function (a, b) { return a.cpi > b.cpi ? a : b; });
         var totalChange = ((latest.cpi / first.cpi) - 1) * 100;
         var lastMom = momValues.length > 0 ? momValues[momValues.length - 1] : 0;
+
+        /* YoY inflation: compare latest month with same month one year earlier */
+        var yoy = null;
+        var yoyRefDate = null;
+        var latestD = new Date(latest.date + "T00:00:00");
+        var targetYear = latestD.getFullYear() - 1;
+        var targetMonth = latestD.getMonth();
+        for (var k = valid.length - 2; k >= 0; k--) {
+            var d = new Date(valid[k].date + "T00:00:00");
+            if (d.getFullYear() === targetYear && d.getMonth() === targetMonth) {
+                yoy = ((latest.cpi / valid[k].cpi) - 1) * 100;
+                yoyRefDate = valid[k].date;
+                break;
+            }
+        }
 
         document.getElementById("kpi-latest").textContent = latest.cpi;
         document.getElementById("kpi-latest-label").textContent =
@@ -198,9 +212,17 @@
             (lastMom > 0 ? "+" : "") + lastMom.toFixed(1) + "%";
         document.getElementById("kpi-mom").style.color =
             lastMom > 0 ? "#E53935" : "#43A047";
-        document.getElementById("kpi-peak").textContent = peak.cpi;
-        document.getElementById("kpi-peak-label").textContent =
-            "Peak CPI (" + fmtDate(peak.date) + ")";
+        if (yoy !== null) {
+            document.getElementById("kpi-yoy").textContent =
+                (yoy > 0 ? "+" : "") + yoy.toFixed(1) + "%";
+            document.getElementById("kpi-yoy").style.color =
+                yoy > 0 ? "#E53935" : "#43A047";
+            document.getElementById("kpi-yoy-label").textContent =
+                "YoY Inflation (" + fmtDate(yoyRefDate) + " \u2192 " + fmtDate(latest.date) + ")";
+        } else {
+            document.getElementById("kpi-yoy").textContent = "\u2014";
+            document.getElementById("kpi-yoy-label").textContent = "YoY Inflation (no data)";
+        }
         document.getElementById("kpi-total").textContent =
             (totalChange > 0 ? "+" : "") + totalChange.toFixed(0) + "%";
         document.getElementById("kpi-total-label").textContent =
