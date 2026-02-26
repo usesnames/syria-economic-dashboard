@@ -1,191 +1,285 @@
-
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analisi Macroeconomica della Siria | Dashboard Interattiva</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Syria Economic Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f7fa;
+            color: #1a1a2e;
             line-height: 1.6;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
         .header {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-        }
-
-        .header h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            color: #7f8c8d;
-            font-size: 1.1em;
-        }
-
-        .chart-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .chart-section h2 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.8em;
-            border-left: 5px solid #667eea;
-            padding-left: 15px;
-        }
-
-        .chart-section p {
-            color: #555;
-            margin-bottom: 20px;
-            font-size: 1.05em;
-        }
-
-        .footer {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 30px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .footer p {
-            color: #7f8c8d;
-            margin: 5px 0;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: white;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 2.5rem 2rem 2rem;
             text-align: center;
         }
-
-        .stat-card h3 {
-            font-size: 2em;
-            margin-bottom: 5px;
+        .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .header p { font-size: 1rem; opacity: 0.8; }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
         }
-
-        .stat-card p {
-            color: rgba(255,255,255,0.9);
-            font-size: 0.9em;
+        .filters {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
         }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.8em;
-            }
-
-            .chart-section {
-                padding: 20px;
-            }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .filter-group label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #444;
+        }
+        .filter-group select {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 0.95rem;
+            background: white;
+            color: #1a1a2e;
+            cursor: pointer;
+            min-width: 200px;
+        }
+        .filter-group select:focus {
+            outline: none;
+            border-color: #1565C0;
+            box-shadow: 0 0 0 2px rgba(21,101,192,0.15);
+        }
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .kpi-card .value { font-size: 2rem; font-weight: 700; color: #1565C0; }
+        .kpi-card .label { font-size: 0.85rem; color: #666; margin-top: 0.2rem; }
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.8rem;
+            color: #999;
+        }
+        .footer a { color: #1565C0; text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        .error-msg {
+            text-align: center;
+            padding: 3rem;
+            color: #E53935;
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>Syria in Numbers</h1>
+        <p>Consumer Price Index &amp; Inflation Dashboard</p>
+    </div>
     <div class="container">
-        <div class="header">
-            <h1>📊 Analisi Macroeconomica della Siria</h1>
-            <p>Dashboard Interattiva basata sui dati della Banca Mondiale</p>
-            <p><em>World Development Indicators - Aggiornamento 2023</em></p>
-        </div>
-
-        <div class="chart-section">
-            <h2>1. Andamento del PIL (1960-2023)</h2>
-            <p>Il PIL siriano mostra un drammatico crollo dal 2011, riflettendo l'impatto devastante del conflitto.</p>
-            <div>                            <div id="45fdf78a-46d6-464d-9ad7-e04a7ac5b27d" class="plotly-graph-div" style="height:600px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("45fdf78a-46d6-464d-9ad7-e04a7ac5b27d")) {                    Plotly.newPlot(                        "45fdf78a-46d6-464d-9ad7-e04a7ac5b27d",                        [{"hovertemplate":"\u003cb\u003eAnno %{x}\u003c\u002fb\u003e\u003cbr\u003ePIL: $%{y:.2f}B\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#1f77b4","width":3},"marker":{"size":6},"mode":"lines+markers","name":"PIL","x":{"dtype":"i2","bdata":"qAepB6oHqwesB60HrgevB7AHsQeyB7MHtAe1B7YHtwe4B7kHuge7B7wHvQe+B78HwAfBB8IHwwfEB8UHxgfHB8gHyQfKB8sHzAfNB84HzwfQB9EH0gfTB9QH1QfWB9cH2AfZB9oH2wfcB90H3gffB+AH4QfiB+MH5AflB+YH5wc="},"y":{"dtype":"f8","bdata":"KhanhlBy6z9QkDdicj\u002fuP7SZnrrgxPE\u002fg8B4Vwg18z8EMWCKkW71P0c75i92jfc\u002foZBsgwJ69T+7QMsKn0j5P4kti2pYD\u002fw\u002fVFHRmMj1AUBrI+GmgR8BQPMDuPgDuARA3VTbZTp6CECNylZueOoJQHKT6fJioxRAWzgo9tNOG0DON5LKu4geQJAMHja3yB5AtIoPE+eMIkDMmaI3\u002f9sjQJkCeJD1HypAAdh3r1EJL0DDFJichkwwQJkH6t3aljFAm60wu8mAMUA4HfJjTmcwQPp0kgAflipAP6M54mG2JkCrXKMAciclQOCCDUrwtCNAVKAKBQSeKEARlNHbsvYpQDX6cWLTgSpA6g93I1VkK0B06spneT4kQLENMSAdyyZAhIPMUkGUK0AJKeH1rQItQPiXnE7VZi5A4ynHq2y\u002fL0Bjsuys4u8yQFjyAKetPDRA2kS6AlurNEA55UZKAdQ1QM6bPGNCFjlAjPEEKuXbPEDiqQOeOuBAQJ+VgI2PO0RA9lM6tmlHSkDUi2NaTQ5LQKSNAL8Gsk5Ajtev\u002fYXiUEAS2V5XXJhFQIwSCy97XDVAEdaoGYeANUA9OltXhHcwQKWX1AgaMilAUPfODa5eMEC5CLGybn81QKAl6XBClTZAEahy9HIYKECL1Otf17QsQC+JcZhxnzdASNSdFFL+M0A="},"type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"shapes":[{"fillcolor":"red","layer":"below","line":{"width":0},"opacity":0.1,"type":"rect","x0":2011,"x1":2023,"xref":"x","y0":0,"y1":1,"yref":"y domain"}],"annotations":[{"showarrow":false,"text":"Periodo di conflitto","x":2011,"xanchor":"left","xref":"x","y":1,"yanchor":"top","yref":"y domain"}],"title":{"font":{"size":20,"color":"#2c3e50"},"text":"Andamento del PIL Siriano (1960-2023)","x":0.5,"xanchor":"center"},"font":{"size":12},"xaxis":{"title":{"text":"Anno"}},"yaxis":{"title":{"text":"PIL (miliardi USD)"}},"hovermode":"x unified","height":600},                        {"responsive": true}                    )                };            </script>        </div>
-        </div>
-
-        <div class="chart-section">
-            <h2>2. Inflazione e Stabilità Monetaria</h2>
-            <p>L'inflazione ha raggiunto livelli critici, con l'indice dei prezzi che è aumentato esponenzialmente.</p>
-            <div>                            <div id="19453c7c-e827-4a59-b9a3-4ad71f48b631" class="plotly-graph-div" style="height:800px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("19453c7c-e827-4a59-b9a3-4ad71f48b631")) {                    Plotly.newPlot(                        "19453c7c-e827-4a59-b9a3-4ad71f48b631",                        [{"fill":"tozeroy","hovertemplate":"\u003cb\u003e%{x}\u003c\u002fb\u003e\u003cbr\u003eCPI: %{y:.2f}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#e74c3c","width":2},"mode":"lines","name":"CPI","x":{"dtype":"i2","bdata":"qAepB6oHqwesB60HrgevB7AHsQeyB7MHtAe1B7YHtwe4B7kHuge7B7wHvQe+B78HwAfBB8IHwwfEB8UHxgfHB8gHyQfKB8sHzAfNB84HzwfQB9EH0gfTB9QH1QfWB9cH2AfZB9oH2wfcB90H3gffB+AH4QfiB+MH"},"y":{"dtype":"f8","bdata":"MQQ4\u002fVFB9z92oSR38LX3Pyrqtuh6zPY\u002ftnxLklg89z8OWSI2Wn34PzQPcGwqivc\u002flH073cJu+D8pNdl4cwL6PzRakvwiwPo\u002f+VnSvvM3+j\u002fDo2QnO2\u002f7P1LJvYcx+fw\u002fe+4GPNWU\u002fT9Uwv12Uc0BQGdWus79kARAG2qg+57sBkBX1RERUosJQKYnFqrNmQxAMrPxruv5DUCvxRxKPlcPQFdKAYG4sRJAEicmjQMiFkBCMw9HcUwZQG9O8uZF2RpA5JRtnqRTHUCUT7g8dzEhQCq8RLzJZCdAw5PhIZenMkChsabYIxo5QH2ReHCr9jtAvrBuGZ2xQEDbc4UoPTJCQKMi+ZESM0RAwAs+ydneRkClfchBT2BKQDntIhwke0xASvIn9abUTkArFf0xhGlPQEifzoRpKU9AU7841fMBTkBf36IlftpMQFZHU2kWuE1A1IRBmSiuTUBedtZinGZPQIUlsad8ZVBA1Y+xT2aVUUBvt3L7n1hTQCbMdbwoGlRA0PAqSXBEV0BsBBOJa\u002fJXQAAAAAAAAFlAispP1jMwWkD+XFo7ZuZhQC0AjmnREGlAOhtYtf3Na0B0QOps0z9zQJ2pmjanbnxA4\u002fXgCSXJgECOCLGClPGAQPsxauiTN4NA"},"type":"scatter","xaxis":"x","yaxis":"y"},{"hovertemplate":"\u003cb\u003e%{x}\u003c\u002fb\u003e\u003cbr\u003eInflazione: %{y:.1f}%\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#f39c12"},"name":"Inflazione","x":{"dtype":"i2","bdata":"qAepB6oHqwesB60HrgevB7AHsQeyB7MHtAe1B7YHtwe4B7kHuge7B7wHvQe+B78HwAfBB8IHwwfEB8UHxgfHB8gHyQfKB8sHzAfNB84HzwfQB9EH0gfTB9QH1QfWB9cH2AfZB9oH2wfcB90H3gffB+AH4QfiB+MH"},"y":{"dtype":"f8","bdata":"AAAAAAAA+H98pwf3nVf\u002fP4DnxE7sxA7ATKmqqqqq\u002fj+ag8xZFZYVQHLFBYskCA\u002fAaM4xidhYDkCbMf0sBdEZQHIgouVUygZAZD8XXXTR\u002f78f7zNK\u002fIwSQHOFpFgLcBZA0t+8T3HJAEBQTpQSE1w0QH3wEPJ6Di9AEHxEThDuJkDrbdu2bdsmQBR+7ud+7idAvbDihJQ8E0AHOTFYUzUSQPyH267hSzNA2mZBtedkMkDY98r3TZssQMyFZOxYghhAi56oaIN1IkCVonEbwEAxQEQgCIIgCEJARU\u002fWwv+9TUDvH+2P9kdBQICMGTNmzCZAbnEfF5llM0ARAAAAAAAiQABg036yBCZABVWYeD9yKkC+VcLYLKguQMhRHw966x9ASO5WmPF\u002fIEC4F3gbgy3+PyQikYBhgum\u002fotlLaC+hDcDM68RO7MQOwKL\u002f\u002f\u002f\u002f\u002f\u002fwdAIBD4p2W0wL9KyCAP9C8XQLKlGmmJuxFAMIjCJh72HEDCT2Y3WAwkQPCRXjP9Qg9Agn96RJt9L0A4K+hO\u002f10HQDUYxabzlhFArKj8ZD0DE0AwBEfQ5FlCQAFSEUMTBERAgDW5ta7aJUDR7oW7BjtDQGekprtC2kdAJGfP3kQTMkAwmHQmihzuP\u002fo6Ox\u002fL1SpA"},"type":"bar","xaxis":"x2","yaxis":"y2"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0]},"yaxis":{"anchor":"x","domain":[0.56,1.0],"title":{"text":"CPI (2010=100)"}},"xaxis2":{"anchor":"y2","domain":[0.0,1.0],"title":{"text":"Anno"}},"yaxis2":{"anchor":"x2","domain":[0.0,0.44],"title":{"text":"Tasso (%)"}},"annotations":[{"font":{"size":16},"showarrow":false,"text":"Indice dei Prezzi al Consumo (CPI)","x":0.5,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Tasso di Inflazione Annuale (%)","x":0.5,"xanchor":"center","xref":"paper","y":0.44,"yanchor":"bottom","yref":"paper"}],"title":{"font":{"size":20,"color":"#2c3e50"},"text":"Inflazione e Stabilit\u00e0 Monetaria in Siria","x":0.5,"xanchor":"center"},"height":800,"showlegend":false,"hovermode":"x unified"},                        {"responsive": true}                    )                };            </script>        </div>
-        </div>
-
-        <div class="chart-section">
-            <h2>3. PIL pro Capite e Demografia</h2>
-            <p>Il benessere individuale è tornato ai livelli degli anni '70, nonostante la crescita demografica.</p>
-            <div>                            <div id="5b940ee8-07d8-42d5-91b7-c4cd3777638a" class="plotly-graph-div" style="height:600px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("5b940ee8-07d8-42d5-91b7-c4cd3777638a")) {                    Plotly.newPlot(                        "5b940ee8-07d8-42d5-91b7-c4cd3777638a",                        [{"hovertemplate":"\u003cb\u003eAnno %{x}\u003c\u002fb\u003e\u003cbr\u003ePIL\u002fcapita: $%{y:.0f}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#27ae60","width":3},"marker":{"size":5},"mode":"lines+markers","name":"PIL pro capite","x":{"dtype":"i2","bdata":"qAepB6oHqwesB60HrgevB7AHsQeyB7MHtAe1B7YHtwe4B7kHuge7B7wHvQe+B78HwAfBB8IHwwfEB8UHxgfHB8gHyQfKB8sHzAfNB84HzwfQB9EH0gfTB9QH1QfWB9cH2AfZB9oH2wfcB90H3gffB+AH4QfiB+MH5AflB+YH5wc="},"y":{"dtype":"f8","bdata":"bqQLX83wZkBcIV7bZIloQDJBkQrl\u002fWtA30F2u8pcbUDFR1D79cZvQESBSBNK7XBALBR709fpbUB2y\u002fVcog5xQD9qpRNJVXJAks6RpOC4dkDOCGXMOPd0QHLvirk9iHhAvobq280DfECUFT3uR618QAeA9PqiFIZAK5GZK7U9jEDZhb\u002f26YOOQI41GFbsuY1AjlV91iFPkUASC8N5cumRQIKMyIT1yJZArsMInTAvmkB2u7z1uJqaQAy1hQFUv5tAswwBt+ComkBPW1BMDx+YQBio7bOk4JJAZAZOawYpj0DGkB+Mqw2MQOrubytaSIlA1JdOvOqTjkDvv5G3n0CPQCfYcCMb8Y5A9PW1wisGj0Bt9i0LGkOGQKxH0sGXXYhA2D6qHZGxjECznB3bnGaNQIuWyDWzBo5AwI\u002ffcGWRjkCy8FICwciRQMCFsghRi5JA\u002f+UISP18kkDpNwdgtxCTQGtHKZR1YJVAIGYqTpv3l0D5h4dGItuaQP8tHQ9yRp5Ahrz34T\u002f6okDLRjZkZzyjQMQSSsM6VaVAPVsCeEkQp0Dz+o0EpaadQL2Cwy8kz45AjzmJPl2SkEA0ENlh2n2KQI9uQN\u002fKgoRAD6hUGwScikBq5g54RCiRQFYx3jMoVpFA7gQyotfigUDVM6f56byEQL1TnZyvbpBAWmhqVvt6ikA="},"type":"scatter","xaxis":"x","yaxis":"y"},{"hovertemplate":"\u003cb\u003eAnno %{x}\u003c\u002fb\u003e\u003cbr\u003ePop: %{y:.1f}M\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#3498db","dash":"dash","width":2},"mode":"lines","name":"Popolazione","x":{"dtype":"i2","bdata":"qAepB6oHqwesB60HrgevB7AHsQeyB7MHtAe1B7YHtwe4B7kHuge7B7wHvQe+B78HwAfBB8IHwwfEB8UHxgfHB8gHyQfKB8sHzAfNB84HzwfQB9EH0gfTB9QH1QfWB9cH2AfZB9oH2wfcB90H3gffB+AH4QfiB+MH5AflB+YH5wc="},"y":{"dtype":"f8","bdata":"i2zn+6mxEkDv\u002f+OECUMTQIP6ljld1hNAICbhQh5xFEBxHeOKixMVQLQc6KG2vRVAXOhKBKpvFkBcdR2qKSkXQPPixFc76hdAC3xFt16zGEDIQJ5dvoUZQDy858ByZBpALNhGPNlNG0BODMnJxD0cQC+jWG5pNR1AqFFIMqs3HkCFd7mI70QfQLaCpiVWLiBAT5SERNq+IEAr24e85VIhQLItA85S6iFA0o4bfjeFIkBVM2spICUjQMBAECBDzyNAILQevkyEJEC7C5QUWEAlQMr6zcR0ASZADVNb6iDHJkAhrTHohJAnQCQLmMCtWyhAwylz840oKUDFdYwrLvYpQHGS5o9pxSpAJsXHJ2SXK0DOABdky2osQLtHNlfNOy1Ag9pv7UQJLkCxaaUQyNUuQC9tOCwNpC9AOX6oNGI6MEDHgsKgTKMwQMQKt3wkDTFAl6sfm+R3MUCwdhTnqOMxQArXo3A9VjJAy\u002feMRGjQMkAg1bDfE6MzQHWTGARW4jRAms+52\u002fWiNUCxNPCjGvo1QFPnUfF\u002fezZA2q7QB8vgNkD6tfXTf8I2QH0lkBK7qjVAjUEnhA5GNED9SufDs2wzQFXa4hqfMTNALnWQ14M5M0A5KGGm7ZMzQCkGSDSBWjRAV3kCYacMNUAIc7uX+6A1QB4YQPhQdjZADHOCNjmYN0A="},"type":"scatter","xaxis":"x","yaxis":"y2"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,0.94],"title":{"text":"Anno"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"PIL pro capite (USD)"}},"yaxis2":{"anchor":"x","overlaying":"y","side":"right","title":{"text":"Popolazione (milioni)"}},"title":{"font":{"size":20,"color":"#2c3e50"},"text":"PIL pro Capite e Popolazione della Siria","x":0.5,"xanchor":"center"},"legend":{"x":0.02,"y":0.98,"bgcolor":"rgba(255,255,255,0.8)"},"height":600,"hovermode":"x unified"},                        {"responsive": true}                    )                };            </script>        </div>
-        </div>
-
-        <div class="chart-section">
-            <h2>4. Struttura Settoriale dell'Economia</h2>
-            <p>La composizione del PIL mostra un aumento del peso dell'agricoltura a discapito dell'industria.</p>
-            <div>                            <div id="e9d088ef-e697-464b-a8c3-f8289614edb6" class="plotly-graph-div" style="height:600px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("e9d088ef-e697-464b-a8c3-f8289614edb6")) {                    Plotly.newPlot(                        "e9d088ef-e697-464b-a8c3-f8289614edb6",                        [{"hovertemplate":"\u003cb\u003e%{x}\u003c\u002fb\u003e\u003cbr\u003eAgricoltura: %{y:.1f}%\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#27ae60"},"name":"Agricoltura","x":["2000","2005","2010","2015","2019","2020"],"y":{"dtype":"f8","bdata":"OHm9JOS7OEC4+aq7CEs0QGjvNIxgcDNAwfZc\u002fLKQQEBEY0SO2l5EQE1NOPH78EBA"},"type":"bar"},{"hovertemplate":"\u003cb\u003e%{x}\u003c\u002fb\u003e\u003cbr\u003eIndustria: %{y:.1f}%\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#e67e22"},"name":"Industria","x":["2000","2005","2010","2015","2019","2020"],"y":{"dtype":"f8","bdata":"4GFpZNeoQEANHQIS7S8\u002fQH7GELAwbT5AYB9gZZD7LkAcC+UXBNUvQH5DJL0kFzVA"},"type":"bar"},{"hovertemplate":"\u003cb\u003e%{x}\u003c\u002fb\u003e\u003cbr\u003eServizi: %{y:.1f}%\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#3498db"},"name":"Servizi","x":["2000","2005","2010","2015","2019","2020"],"y":{"dtype":"f8","bdata":"duE3iTb5RECedCkZhUJIQA0l3WE3EUlAZwFL6miwSUDnWcJr5KtFQAKRNbBxg0ZA"},"type":"bar"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"title":{"font":{"size":20,"color":"#2c3e50"},"text":"Composizione Settoriale del PIL Siriano (% del PIL)","x":0.5,"xanchor":"center"},"legend":{"x":0.02,"y":0.98,"bgcolor":"rgba(255,255,255,0.8)"},"barmode":"stack","xaxis":{"title":{"text":"Anno"}},"yaxis":{"title":{"text":"Percentuale del PIL (%)"}},"height":600,"hovermode":"x unified"},                        {"responsive": true}                    )                };            </script>        </div>
-        </div>
-
-        <div class="chart-section">
-            <h2>5. Dashboard Indicatori Socioeconomici</h2>
-            <p>Una panoramica completa degli indicatori chiave per valutare la situazione complessiva.</p>
-            <div>                            <div id="f700b259-968e-4fa7-8c94-044bb0484633" class="plotly-graph-div" style="height:1000px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("f700b259-968e-4fa7-8c94-044bb0484633")) {                    Plotly.newPlot(                        "f700b259-968e-4fa7-8c94-044bb0484633",                        [{"hovertemplate":"%{x}: %{y:.1f}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#e74c3c","width":2},"marker":{"size":4},"mode":"lines+markers","name":"Accesso elettricit\u00e0 (%)","showlegend":false,"x":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023],"y":[93.4,93.1,86.6,92.6,92.3,92.0,99.5,91.5,91.3,91.1,92.7,91.5,90.7,90.4,90.2,90.0,89.8,89.6,86.0,89.2,89.0,88.8,89.0,88.4],"type":"scatter","xaxis":"x","yaxis":"y"},{"hovertemplate":"%{x}: %{y:.1f}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#3498db","width":2},"marker":{"size":4},"mode":"lines+markers","name":"Mortalit\u00e0 infantile (\u2030)","showlegend":false,"x":[1960,1961,1962,1963,1964,1965,1966,1967,1968,1969,1970,1971,1972,1973,1974,1975,1976,1977,1978,1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023],"y":[105.2,101.9,99.0,96.4,93.9,91.4,88.7,85.8,82.7,79.4,76.1,72.9,70.0,67.1,64.3,61.6,58.9,56.2,53.5,50.8,48.3,48.4,50.4,41.7,39.9,38.2,36.6,35.2,33.9,32.8,31.6,30.5,29.4,28.2,27.0,25.8,24.7,23.6,22.5,21.6,20.8,20.1,19.5,18.9,18.5,18.1,17.9,17.7,17.6,17.6,17.6,18.8,23.7,25.0,24.7,25.6,23.9,24.5,24.5,21.5,20.4,19.7,19.5,19.0],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"hovertemplate":"%{x}: %{y:.1f}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#27ae60","width":2},"marker":{"size":4},"mode":"lines+markers","name":"Aspettativa di vita (anni)","showlegend":false,"x":[1960,1961,1962,1963,1964,1965,1966,1967,1968,1969,1970,1971,1972,1973,1974,1975,1976,1977,1978,1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023],"y":[52.723,53.652,54.569,55.394,56.17,56.901,57.55,58.045,59.118,59.844,60.608,61.334,61.969,60.826,63.441,64.187,64.844,65.398,65.932,66.244,66.545,64.598,60.839,67.35,67.723,68.048,68.415,68.797,69.172,69.486,69.83,70.075,70.243,70.309,70.296,70.209,70.156,70.158,70.237,70.507,70.856,71.296,71.742,72.188,72.494,72.797,73.04,73.256,73.368,73.496,73.542,72.259,66.206,65.146,65.492,63.265,65.19,65.651,67.371,70.97,71.944,72.418,72.79,72.12],"type":"scatter","xaxis":"x3","yaxis":"y3"},{"hovertemplate":"%{x}: %{y:.1f}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#f39c12","width":2},"marker":{"size":4},"mode":"lines+markers","name":"Alfabetizzazione (%)","showlegend":false,"x":[1981,2002,2004,2021],"y":[55.6500015258789,82.8899993896484,80.8399963378906,94.4199981689453],"type":"scatter","xaxis":"x4","yaxis":"y4"},{"hovertemplate":"%{x}: %{y:.1f}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#9b59b6","width":2},"marker":{"size":4},"mode":"lines+markers","name":"Disoccupazione (%)","showlegend":false,"x":[1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],"y":[6.75,6.949,7.4,7.5,7.2,7.222,7.31,7.376,7.6,9.587,11.63,10.94,10.28,9.513,8.809,8.17,8.42,10.94,8.14,8.61,8.627,13.8,14.5,14.783,14.243,13.795,13.597,13.497,13.36,15.191,14.877,13.268,13.187,12.962],"type":"scatter","xaxis":"x5","yaxis":"y5"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,0.45]},"yaxis":{"anchor":"x","domain":[0.7466666666666667,1.0]},"xaxis2":{"anchor":"y2","domain":[0.55,1.0]},"yaxis2":{"anchor":"x2","domain":[0.7466666666666667,1.0]},"xaxis3":{"anchor":"y3","domain":[0.0,0.45]},"yaxis3":{"anchor":"x3","domain":[0.37333333333333335,0.6266666666666667]},"xaxis4":{"anchor":"y4","domain":[0.55,1.0]},"yaxis4":{"anchor":"x4","domain":[0.37333333333333335,0.6266666666666667]},"xaxis5":{"anchor":"y5","domain":[0.0,0.45]},"yaxis5":{"anchor":"x5","domain":[0.0,0.25333333333333335]},"xaxis6":{"anchor":"y6","domain":[0.55,1.0]},"yaxis6":{"anchor":"x6","domain":[0.0,0.25333333333333335]},"annotations":[{"font":{"size":16},"showarrow":false,"text":"Accesso elettricit\u00e0 (%)","x":0.225,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Mortalit\u00e0 infantile (\u2030)","x":0.775,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Aspettativa di vita (anni)","x":0.225,"xanchor":"center","xref":"paper","y":0.6266666666666667,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Alfabetizzazione (%)","x":0.775,"xanchor":"center","xref":"paper","y":0.6266666666666667,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Disoccupazione (%)","x":0.225,"xanchor":"center","xref":"paper","y":0.25333333333333335,"yanchor":"bottom","yref":"paper"},{"showarrow":false,"text":"Inizio conflitto","x":2011,"xanchor":"center","xref":"x","y":1,"yanchor":"bottom","yref":"y domain"},{"showarrow":false,"text":"Inizio conflitto","x":2011,"xanchor":"center","xref":"x2","y":1,"yanchor":"bottom","yref":"y2 domain"},{"showarrow":false,"text":"Inizio conflitto","x":2011,"xanchor":"center","xref":"x3","y":1,"yanchor":"bottom","yref":"y3 domain"},{"showarrow":false,"text":"Inizio conflitto","x":2011,"xanchor":"center","xref":"x4","y":1,"yanchor":"bottom","yref":"y4 domain"},{"showarrow":false,"text":"Inizio conflitto","x":2011,"xanchor":"center","xref":"x5","y":1,"yanchor":"bottom","yref":"y5 domain"}],"title":{"font":{"size":22,"color":"#2c3e50","family":"Arial Black"},"text":"Dashboard Indicatori Socioeconomici della Siria","x":0.5,"xanchor":"center"},"height":1000,"hovermode":"x","shapes":[{"line":{"color":"red","dash":"dash"},"opacity":0.5,"type":"line","x0":2011,"x1":2011,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"line":{"color":"red","dash":"dash"},"opacity":0.5,"type":"line","x0":2011,"x1":2011,"xref":"x2","y0":0,"y1":1,"yref":"y2 domain"},{"line":{"color":"red","dash":"dash"},"opacity":0.5,"type":"line","x0":2011,"x1":2011,"xref":"x3","y0":0,"y1":1,"yref":"y3 domain"},{"line":{"color":"red","dash":"dash"},"opacity":0.5,"type":"line","x0":2011,"x1":2011,"xref":"x4","y0":0,"y1":1,"yref":"y4 domain"},{"line":{"color":"red","dash":"dash"},"opacity":0.5,"type":"line","x0":2011,"x1":2011,"xref":"x5","y0":0,"y1":1,"yref":"y5 domain"}]},                        {"responsive": true}                    )                };            </script>        </div>
-        </div>
-
-        <div class="chart-section">
-            <h2>6. Evoluzione Indicatori Economici</h2>
-            <p>Mappa di calore che mostra l'evoluzione comparativa di diversi indicatori economici.</p>
-            <div>                            <div id="4cb144c4-4ea0-4b1c-9557-ff5540cf1d3d" class="plotly-graph-div" style="height:600px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("4cb144c4-4ea0-4b1c-9557-ff5540cf1d3d")) {                    Plotly.newPlot(                        "4cb144c4-4ea0-4b1c-9557-ff5540cf1d3d",                        [{"colorbar":{"title":{"text":"Scala\u003cbr\u003enormalizzata"}},"colorscale":[[0.0,"rgb(165,0,38)"],[0.1,"rgb(215,48,39)"],[0.2,"rgb(244,109,67)"],[0.3,"rgb(253,174,97)"],[0.4,"rgb(254,224,139)"],[0.5,"rgb(255,255,191)"],[0.6,"rgb(217,239,139)"],[0.7,"rgb(166,217,106)"],[0.8,"rgb(102,189,99)"],[0.9,"rgb(26,152,80)"],[1.0,"rgb(0,104,55)"]],"hovertemplate":"\u003cb\u003e%{y}\u003c\u002fb\u003e\u003cbr\u003eAnno: %{x}\u003cbr\u003eValore norm.: %{z:.1f}\u003cextra\u003e\u003c\u002fextra\u003e","x":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020],"y":["PIL (var %)","Esportazioni (% PIL)","Importazioni (% PIL)","Spesa pubblica (% PIL)","Agricoltura (% PIL)"],"z":[[80.53631320344921,81.64426271046179,90.31225792407149,100.0,99.10123854669538,97.05052057994192,93.56583965024043,95.43921934463636,91.86797379681579,96.14711015920955,94.00023228321498,87.01853288001227,0.0,0.11605667656455854,47.784816858089656,66.06125504954986,59.425685408405485,76.3658290163729,82.6754296131648,82.16125815300998,76.44371984625576],[85.52241652976957,87.78654314516116,96.21217604418244,74.03618146676794,98.25619084204041,100.0,94.03130797734526,92.80564514659008,89.77179648562257,64.78352371337265,73.91571860518452,36.305561825381645,2.0537998288707784,2.2401250894323352,0.0,21.38128732990675,43.096634361168626,36.21841753523629,23.22079835036327,17.616473334488916,19.602980985521295],[7.730527051501543,14.43004148462122,21.621925546717165,8.600051926840093,51.09494815176549,58.36591606348822,38.478606157192004,51.70256696975692,45.99140389191944,16.485907524589457,21.379936935457348,18.743427025791387,0.0,47.32517270321258,100.0,46.650834641938715,90.72801659606945,71.7397920001982,41.27673488254911,6.814806955991156,17.751117991596058],[19.306929660317827,20.305563793859065,17.829705523994114,30.54147956059617,55.244821065151015,33.941348848785005,6.823909952165397,17.955669137093775,6.1187153159839625,14.449491435039732,29.55194153559625,23.520465184676326,43.41621852209139,94.30215001651882,100.0,67.56666895946553,67.626649664155,64.96876537333071,59.065103381105466,52.43029464113067,0.0],[27.189648933525095,29.755049939554773,28.422745087822175,26.832699720397496,16.72467899837406,6.9898749930507975,12.283092454084187,3.1949833465566893,0.0,18.370136422184892,3.104759125797939,8.59919272482745,21.268917197985605,28.87710162374755,36.86083528996351,65.38227613185728,70.0965244738841,99.5204049084793,92.12557738856482,100.0,68.80387591484882]],"type":"heatmap"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"title":{"font":{"size":20,"color":"#2c3e50"},"text":"Evoluzione Indicatori Economici Chiave (2000-2020)\u003cbr\u003e\u003csub\u003eValori normalizzati 0-100 per confronto\u003c\u002fsub\u003e","x":0.5,"xanchor":"center"},"xaxis":{"title":{"text":"Anno"}},"yaxis":{"title":{"text":"Indicatore"}},"height":600},                        {"responsive": true}                    )                };            </script>        </div>
-        </div>
-
-        <div class="footer">
-            <h3>Conclusioni Chiave</h3>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>-82%</h3>
-                    <p>Riduzione PIL dal picco</p>
-                </div>
-                <div class="stat-card">
-                    <h3>600+</h3>
-                    <p>Indice CPI (2010=100)</p>
-                </div>
-                <div class="stat-card">
-                    <h3>40%</h3>
-                    <p>Agricoltura nel PIL</p>
-                </div>
-                <div class="stat-card">
-                    <h3>12+ anni</h3>
-                    <p>Periodo di crisi</p>
-                </div>
+        <div class="filters">
+            <div class="filter-group">
+                <label for="region-select">Region:</label>
+                <select id="region-select"></select>
             </div>
-            <p><strong>Fonte dati:</strong> World Bank - World Development Indicators</p>
-            <p><strong>Analisi realizzata con:</strong> Python, Pandas, Plotly</p>
-            <p style="margin-top: 20px; color: #95a5a6;">© 2025 - Dashboard realizzata per scopi informativi e di ricerca</p>
+            <div class="filter-group">
+                <label for="commodity-select">Commodity:</label>
+                <select id="commodity-select"></select>
+            </div>
+        </div>
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="value" id="kpi-latest">&mdash;</div>
+                <div class="label" id="kpi-latest-label">Latest CPI</div>
+            </div>
+            <div class="kpi-card">
+                <div class="value" id="kpi-mom">&mdash;</div>
+                <div class="label">Last Monthly Change</div>
+            </div>
+            <div class="kpi-card">
+                <div class="value" id="kpi-peak">&mdash;</div>
+                <div class="label" id="kpi-peak-label">Peak CPI</div>
+            </div>
+            <div class="kpi-card">
+                <div class="value" id="kpi-total" style="color: #E53935">&mdash;</div>
+                <div class="label" id="kpi-total-label">Total Change</div>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div id="chart-cpi"></div>
+        </div>
+        <div class="chart-card">
+            <div id="chart-mom"></div>
         </div>
     </div>
+    <div class="footer">
+        Data source: <a href="https://scpr-syria.org/publications/bulletins/" target="_blank">Syrian Center for Policy Research (SCPR)</a>
+        &middot; Base year: 2021 = 100
+    </div>
+
+    <script>
+    /* --- Helpers --- */
+    function fmtDate(d) {
+        return new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    }
+    function fmtDateLong(d) {
+        return new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    }
+
+    var _data = null;
+
+    function renderDashboard() {
+        var region    = document.getElementById("region-select").value;
+        var commodity = document.getElementById("commodity-select").value;
+        var records   = _data.records;
+        var dates     = records.map(function (r) { return r.date; });
+
+        /* Extract CPI series: record[commodity][region] */
+        var cpis = records.map(function (r) {
+            var c = r[commodity];
+            return c ? c[region] : null;
+        });
+
+        /* Month-over-month changes (skip nulls) */
+        var momDates = [], momValues = [], momColors = [];
+        for (var i = 1; i < cpis.length; i++) {
+            if (cpis[i] != null && cpis[i - 1] != null && cpis[i - 1] !== 0) {
+                momDates.push(dates[i]);
+                var ch = Math.round(((cpis[i] - cpis[i - 1]) / cpis[i - 1]) * 10000) / 100;
+                momValues.push(ch);
+                momColors.push(ch > 0 ? "#E53935" : "#43A047");
+            }
+        }
+
+        /* KPI cards */
+        var valid = [];
+        for (var j = 0; j < records.length; j++) {
+            var v = cpis[j];
+            if (v != null) valid.push({ date: dates[j], cpi: v });
+        }
+        if (valid.length === 0) return;
+
+        var latest = valid[valid.length - 1];
+        var first  = valid[0];
+        var peak   = valid.reduce(function (a, b) { return a.cpi > b.cpi ? a : b; });
+        var totalChange = ((latest.cpi / first.cpi) - 1) * 100;
+        var lastMom = momValues.length > 0 ? momValues[momValues.length - 1] : 0;
+
+        document.getElementById("kpi-latest").textContent = latest.cpi;
+        document.getElementById("kpi-latest-label").textContent =
+            "Latest CPI (" + fmtDate(latest.date) + ")";
+        document.getElementById("kpi-mom").textContent =
+            (lastMom > 0 ? "+" : "") + lastMom.toFixed(1) + "%";
+        document.getElementById("kpi-mom").style.color =
+            lastMom > 0 ? "#E53935" : "#43A047";
+        document.getElementById("kpi-peak").textContent = peak.cpi;
+        document.getElementById("kpi-peak-label").textContent =
+            "Peak CPI (" + fmtDate(peak.date) + ")";
+        document.getElementById("kpi-total").textContent =
+            (totalChange > 0 ? "+" : "") + totalChange.toFixed(0) + "%";
+        document.getElementById("kpi-total-label").textContent =
+            "Total Change (" + fmtDate(first.date) + " \u2014 " + fmtDate(latest.date) + ")";
+
+        var regionLabel = region === "SYRIA" ? "Syria (National)" : region;
+        var subtitle = commodity === "All commodities" ? regionLabel : regionLabel + " \u2014 " + commodity;
+
+        /* Chart 1: CPI Trend */
+        Plotly.newPlot("chart-cpi", [{
+            x: dates, y: cpis,
+            mode: "lines+markers", name: "CPI",
+            line: { color: "#2196F3", width: 2.5 },
+            marker: { size: 6, color: "#1565C0" },
+            text: dates.map(fmtDateLong),
+            hovertemplate: "<b>%{text}</b><br>CPI: %{y}<extra></extra>",
+            fill: "tozeroy", fillcolor: "rgba(33,150,243,0.07)"
+        }], {
+            title: { text: "Consumer Price Index \u2014 " + subtitle, font: { size: 18 } },
+            yaxis: { title: "CPI (2021 = 100)" }, xaxis: { title: "" },
+            template: "plotly_white", height: 420,
+            margin: { l: 60, r: 30, t: 60, b: 40 },
+            hovermode: "x unified"
+        }, { responsive: true });
+
+        /* Chart 2: MoM Change */
+        Plotly.newPlot("chart-mom", [{
+            x: momDates, y: momValues, type: "bar",
+            marker: { color: momColors },
+            text: momDates.map(fmtDateLong), textposition: "none",
+            hovertemplate: "<b>%{text}</b><br>Change: %{y:+.2f}%<extra></extra>",
+            name: "MoM Change"
+        }], {
+            title: { text: "Month-over-Month Change \u2014 " + subtitle, font: { size: 18 } },
+            yaxis: { title: "Monthly Change (%)" }, xaxis: { title: "" },
+            template: "plotly_white", height: 400,
+            margin: { l: 60, r: 30, t: 60, b: 40 },
+            hovermode: "x unified",
+            shapes: [{ type: "line", x0: 0, x1: 1, xref: "paper", y0: 0, y1: 0, line: { color: "black", width: 1 } }]
+        }, { responsive: true });
+    }
+
+    /* --- Load data and initialise --- */
+    fetch("data/cpi_data.json")
+        .then(function (res) {
+            if (!res.ok) throw new Error("Could not load data/cpi_data.json");
+            return res.json();
+        })
+        .then(function (data) {
+            _data = data;
+
+            /* Populate region dropdown */
+            var regionSelect = document.getElementById("region-select");
+            data.governorates.forEach(function (gov) {
+                var opt = document.createElement("option");
+                opt.value = gov;
+                opt.textContent = gov === "SYRIA" ? "SYRIA (National)" : gov;
+                regionSelect.appendChild(opt);
+            });
+
+            /* Populate commodity dropdown */
+            var commoditySelect = document.getElementById("commodity-select");
+            data.commodities.forEach(function (com) {
+                var opt = document.createElement("option");
+                opt.value = com;
+                opt.textContent = com;
+                commoditySelect.appendChild(opt);
+            });
+
+            regionSelect.addEventListener("change", renderDashboard);
+            commoditySelect.addEventListener("change", renderDashboard);
+
+            renderDashboard();
+        })
+        .catch(function (err) {
+            document.querySelector(".container").innerHTML =
+                '<div class="error-msg">\u26A0 ' + err.message +
+                '<br><small>Run the notebook first to generate data/cpi_data.json</small></div>';
+        });
+    </script>
 </body>
 </html>

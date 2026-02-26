@@ -1,33 +1,12 @@
+# PDF bulletins (too large for GitHub Pages, only needed locally)
+data/scpr_bulletins_cpi/
+
+# macOS
+.DS_Store
+
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-.venv
+*.pyc
 
-# Jupyter Notebook
-.ipynb_checkpoints
-*.ipynb_checkpoints
-
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Data files (se vuoi escluderli - commenta se vuoi includerli)
-# *.csv
-# *.xlsx
-
-# Output temporanei
-*.log
-*.tmp
+# Jupyter
+.ipynb_checkpoints/
