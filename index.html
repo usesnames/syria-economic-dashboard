@@ -326,7 +326,7 @@
             fill: "tozeroy", fillcolor: "rgba(33,150,243,0.07)"
         }], {
             title: { text: "Consumer Price Index \u2014 " + subtitle, font: { size: 18 } },
-            yaxis: { title: "CPI (2021 = 100)" }, xaxis: { title: "" },
+            yaxis: { title: "CPI (2021 = 100)" }, xaxis: { title: "", hoverformat: "%b %Y" },
             template: "plotly_white", height: 420,
             margin: { l: 60, r: 30, t: 60, b: 40 },
             hovermode: "x unified"
@@ -340,7 +340,7 @@
             name: "MoM Change"
         }], {
             title: { text: "Month-over-Month Change \u2014 " + subtitle, font: { size: 18 } },
-            yaxis: { title: "Monthly Change (%)" }, xaxis: { title: "" },
+            yaxis: { title: "Monthly Change (%)" }, xaxis: { title: "", hoverformat: "%b %Y" },
             template: "plotly_white", height: 400,
             margin: { l: 60, r: 30, t: 60, b: 40 },
             hovermode: "x unified",
@@ -418,7 +418,7 @@
         }], {
             title: { text: "Average Monthly Wage \u2014 " + cat + " (" + area + ")", font: { size: 18 } },
             yaxis: { title: "Monthly Wage (SYP)", tickformat: ",d" },
-            xaxis: { title: "" },
+            xaxis: { title: "", hoverformat: "%b %Y" },
             template: "plotly_white", height: 420,
             margin: { l: 80, r: 30, t: 60, b: 40 },
             hovermode: "x unified"
@@ -444,7 +444,7 @@
         Plotly.newPlot("chart-wage-compare", traces, {
             title: { text: "Wage Comparison Across Control Areas \u2014 " + cat, font: { size: 18 } },
             yaxis: { title: "Monthly Wage (SYP)", tickformat: ",d" },
-            xaxis: { title: "" },
+            xaxis: { title: "", hoverformat: "%b %Y" },
             template: "plotly_white", height: 420,
             margin: { l: 80, r: 30, t: 60, b: 40 },
             hovermode: "x unified",
