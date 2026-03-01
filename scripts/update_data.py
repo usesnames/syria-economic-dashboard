@@ -422,65 +422,72 @@ def _classify_wage(label, sector):
 
 
 def extract_wages_from_pdf(pdf_path):
-    with pdfplumber.open(pdf_path) as pdf:
-        for page in pdf.pages:
-            text = page.extract_text() or ""
-            if "average monthly wage" not in text.lower():
-                continue
-            tables = page.extract_tables()
-            for table in tables:
-                if not table or len(table) < 5:
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            # Scan all pages — script runs weekly, no rush
+            for page in pdf.pages:
+                try:
+                    text = page.extract_text() or ""
+                except Exception:
                     continue
-                flat = " ".join(str(c or "") for row in table for c in row).lower()
-                if "public sector" not in flat:
+                if "average monthly wage" not in text.lower():
                     continue
-                area_cols = _detect_area_cols(table)
-                if not area_cols:
-                    continue
-                value_cols = _find_value_cols(table, area_cols)
-                if len(value_cols) < 3:
-                    continue
-                result = {}
-                current_sector = None
-                for i in range(len(table)):
-                    row = table[i]
-                    label = str(row[0] or "").strip() + " " + str(row[1] or "").strip()
-                    label = " ".join(label.split()).strip()
-                    if i + 1 < len(table):
-                        nxt = " ".join(
-                            (str(table[i + 1][0] or "") + " " + str(table[i + 1][1] or "")).split()
-                        ).strip()
-                        if nxt and (nxt.startswith("(") or nxt.endswith(")")):
-                            label = label + " " + nxt
-                    label_lower = label.lower()
-                    if "public sector" in label_lower:
-                        current_sector = "public"
+                tables = page.extract_tables()
+                for table in tables:
+                    if not table or len(table) < 5:
                         continue
-                    elif "private sector" in label_lower:
-                        current_sector = "private"
+                    flat = " ".join(str(c or "") for row in table for c in row).lower()
+                    if "public sector" not in flat:
                         continue
-                    elif "civil" in label_lower and (
-                        "sector" in label_lower or "society" in label_lower
-                    ):
-                        current_sector = "civil"
+                    area_cols = _detect_area_cols(table)
+                    if not area_cols:
                         continue
-                    area_vals = {}
-                    for area_name, col_candidates in value_cols.items():
-                        for try_col in col_candidates:
-                            if try_col < len(row):
-                                raw = str(row[try_col] or "").replace(",", "").replace(" ", "").strip()
-                                try:
-                                    area_vals[area_name] = int(raw)
-                                    break
-                                except ValueError:
-                                    pass
-                    if not area_vals:
+                    value_cols = _find_value_cols(table, area_cols)
+                    if len(value_cols) < 3:
                         continue
-                    wage_cat = _classify_wage(label, current_sector)
-                    if wage_cat:
-                        result[wage_cat] = area_vals
-                if len(result) >= 4:
-                    return result
+                    result = {}
+                    current_sector = None
+                    for i in range(len(table)):
+                        row = table[i]
+                        label = str(row[0] or "").strip() + " " + str(row[1] or "").strip()
+                        label = " ".join(label.split()).strip()
+                        if i + 1 < len(table):
+                            nxt = " ".join(
+                                (str(table[i + 1][0] or "") + " " + str(table[i + 1][1] or "")).split()
+                            ).strip()
+                            if nxt and (nxt.startswith("(") or nxt.endswith(")")):
+                                label = label + " " + nxt
+                        label_lower = label.lower()
+                        if "public sector" in label_lower:
+                            current_sector = "public"
+                            continue
+                        elif "private sector" in label_lower:
+                            current_sector = "private"
+                            continue
+                        elif "civil" in label_lower and (
+                            "sector" in label_lower or "society" in label_lower
+                        ):
+                            current_sector = "civil"
+                            continue
+                        area_vals = {}
+                        for area_name, col_candidates in value_cols.items():
+                            for try_col in col_candidates:
+                                if try_col < len(row):
+                                    raw = str(row[try_col] or "").replace(",", "").replace(" ", "").strip()
+                                    try:
+                                        area_vals[area_name] = int(raw)
+                                        break
+                                    except ValueError:
+                                        pass
+                        if not area_vals:
+                            continue
+                        wage_cat = _classify_wage(label, current_sector)
+                        if wage_cat:
+                            result[wage_cat] = area_vals
+                    if len(result) >= 4:
+                        return result
+    except Exception as e:
+        print(f"  ⚠ Wage extraction error in {os.path.basename(pdf_path)}: {e}")
     return None
 
 
