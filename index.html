@@ -666,8 +666,8 @@
                     </div>
                 </div>
                 <div class="chart-card"><div id="chart-ref-bycountry"></div></div>
-                <div class="chart-card"><div id="chart-ref-demography"></div></div>
                 <div class="chart-card"><div id="chart-ref-timeseries"></div></div>
+                <div class="chart-card"><div id="chart-ref-demography"></div></div>
             </div>
         </div>
     </div>
@@ -1318,7 +1318,8 @@
             fetchUNHCR("get/sublocation?widget_id=583863&sv_id=4&population_collection=24&forcesublocation=0&fromDate=1900-01-01", "countries"),
             fetchUNHCR("get/timeseries?widget_id=583879&sv_id=4&population_group=5112&frequency=year&fromDate=1900-01-01", "resettlement"),
             fetchUNHCR("get/timeseries?widget_id=583881&sv_id=4&population_group=5110&frequency=year&fromDate=1900-01-01", "returns"),
-            fetchUNHCR("get/demography?widget_id=583866&sv_id=4&population_collection=24", "demography")
+            fetchUNHCR("get/demography?widget_id=583866&sv_id=4&population_collection=24", "demography"),
+            fetchUNHCR("get/timeseries?widget_id=583862&sv_id=4&population_collection=22&frequency=year&fromDate=1900-01-01", "totalTS")
         ]).then(function () {
             _unhcrReady = true;
             document.getElementById("refugees-loader").classList.remove("loading");
@@ -1333,6 +1334,7 @@
         var resettlement = _unhcrData.resettlement;
         var returns = _unhcrData.returns;
         var demography = _unhcrData.demography;
+        var totalTS = _unhcrData.totalTS;
 
         /* ---- KPIs ---- */
         if (total && total.data && total.data.length > 0) {
@@ -1501,21 +1503,46 @@
             }
             if (retYears.length > 0) {
                 tsTraces.push({
-                    x: retYears, y: retVals,
-                    mode: "lines+markers",
+                    x: retYears, y: retVals, type: "bar",
                     name: "Self-Organized Returns",
-                    line: { color: "#FF9800", width: 2.5 },
-                    marker: { size: 7 },
+                    marker: { color: "#FF9800" },
                     hovertemplate: "%{x}<br>Returns: %{y:,.0f}<extra></extra>"
                 });
             }
 
+            /* Total refugees line on secondary y-axis */
+            var _totTS = (totalTS && totalTS.data && totalTS.data.timeseries) ? totalTS.data.timeseries : [];
+            if (_totTS.length > 0) {
+                var totSorted = _totTS.slice().sort(function (a, b) {
+                    return (a.data_date || "").localeCompare(b.data_date || "");
+                });
+                /* Deduplicate: keep the latest record per year */
+                var totByYear = {};
+                totSorted.forEach(function (r) {
+                    var yr = _tsYear(r);
+                    totByYear[yr] = r; /* last (most recent date) wins */
+                });
+                var dedupYears = Object.keys(totByYear).sort(function (a, b) { return a - b; });
+                var totYears = dedupYears.map(String);
+                var totVals = dedupYears.map(function (yr) { return (parseInt(totByYear[yr].individuals) || 0) / 1e6; });
+                tsTraces.push({
+                    x: totYears, y: totVals,
+                    mode: "lines+markers",
+                    name: "Total Refugees (M)",
+                    line: { color: "#42a5f5", width: 2.5, dash: "dot" },
+                    marker: { size: 6, symbol: "diamond" },
+                    yaxis: "y2",
+                    hovertemplate: "%{x}<br>Total Refugees: %{y:.2f}M<extra></extra>"
+                });
+            }
+
             Plotly.newPlot("chart-ref-timeseries", tsTraces, applyTheme({
-                title: { text: "Resettlement Submissions & Self-Organized Returns by Year", font: { size: 18 } },
-                yaxis: { title: "People", tickformat: ",d" },
+                title: { text: "Resettlement, Returns & Total Refugees by Year", font: { size: 18 } },
+                yaxis: { title: "Resettlement / Returns", tickformat: ",d" },
+                yaxis2: { title: "Total Refugees (Millions)", overlaying: "y", side: "right", hoverformat: ".2f", rangemode: "tozero" },
                 xaxis: { title: "" },
-                height: 420,
-                margin: { l: 80, r: 30, t: 60, b: 40 },
+                height: 460,
+                margin: { l: 80, r: 80, t: 60, b: 40 },
                 hovermode: "x unified",
                 legend: { orientation: "h", y: -0.12 },
                 bargap: 0.35
