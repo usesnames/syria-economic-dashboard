@@ -8343,6 +8343,45 @@
       }
     },
     {
+      "date": "2025-07-01",
+      "Civil: University Grad": {
+        "SYP-Governed": 1812887,
+        "TL-Governed": 4189790,
+        "AA": 3121236,
+        "Whole of Syria": 2330875
+      },
+      "Private: Company Director": {
+        "SYP-Governed": 3266558,
+        "TL-Governed": 3898656,
+        "AA": 2175702,
+        "Whole of Syria": 3251953
+      },
+      "Private: Shop Worker": {
+        "SYP-Governed": 1097781,
+        "TL-Governed": 1313784,
+        "AA": 1035907,
+        "Whole of Syria": 1132040
+      },
+      "Public: 4th Band": {
+        "SYP-Governed": 895000,
+        "TL-Governed": 1212899,
+        "AA": 1040000,
+        "Whole of Syria": 965884
+      },
+      "Public: Professor": {
+        "SYP-Governed": 3030000,
+        "TL-Governed": 5202428,
+        "AA": 3090000,
+        "Whole of Syria": 3300147
+      },
+      "Public: University Grad": {
+        "SYP-Governed": 935000,
+        "TL-Governed": 2066556,
+        "AA": 1060000,
+        "Whole of Syria": 1109182
+      }
+    },
+    {
       "date": "2025-08-01",
       "Civil: University Grad": {
         "SYP-Governed": 1894805,
