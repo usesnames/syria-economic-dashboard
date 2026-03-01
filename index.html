@@ -143,6 +143,46 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
+        /* GDP mode toggle */
+        .gdp-toggle {
+            padding: 6px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-card);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .gdp-toggle:hover { border-color: #42a5f5; color: var(--text); }
+        .gdp-toggle.active { background: #42a5f5; color: #fff; border-color: #42a5f5; }
+
+        /* Sub-tab bar inside World Bank macrotab */
+        .sub-tab-bar {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1rem 0;
+        }
+        .sub-tab-btn {
+            padding: 8px 22px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .sub-tab-btn:hover { border-color: #42a5f5; color: var(--text); }
+        .sub-tab-btn.active { background: #42a5f5; color: #fff; border-color: #42a5f5; }
+        .sub-content { display: none; }
+        .sub-content.active { display: block; }
+
         /* ====== Layout ====== */
         .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem; }
         .filters {
@@ -320,7 +360,7 @@
             <span id="theme-icon">&#9790;</span>
         </button>
         <h1>Syria in Numbers</h1>
-        <p>Economic Dashboard &mdash; CPI, Inflation &amp; Wages</p>
+        <p>Economic Dashboard &mdash; CPI, Inflation, Wages &amp; World Bank Indicators</p>
         <div class="freshness" id="freshness-badge" style="display:none">
             <span class="dot" id="freshness-dot"></span>
             <span id="freshness-text"></span>
@@ -330,6 +370,7 @@
     <div class="tab-bar">
         <button class="tab-btn active" data-tab="tab-cpi">Consumer Price Index</button>
         <button class="tab-btn" data-tab="tab-wages">Average Wages</button>
+        <button class="tab-btn" data-tab="tab-wb">World Bank Data</button>
     </div>
 
     <!-- ==================== TAB 1: CPI ==================== -->
@@ -466,8 +507,122 @@
         </div>
     </div>
 
+    <!-- ==================== TAB 3: WORLD BANK DATA (macrotab) ==================== -->
+    <div id="tab-wb" class="tab-content">
+        <div class="sub-tab-bar">
+            <button class="sub-tab-btn active" data-sub="sub-economy">Economy</button>
+            <button class="sub-tab-btn" data-sub="sub-popconflict">Population &amp; Conflict</button>
+        </div>
+
+        <!-- SUB-TAB: ECONOMY -->
+        <div id="sub-economy" class="sub-content active">
+        <div id="tab-economy" class="loading">
+        <div class="container">
+            <div class="skeleton">
+                <div class="kpi-row">
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                </div>
+                <div class="skeleton-bar skeleton-chart"></div>
+                <div class="skeleton-bar skeleton-chart"></div>
+            </div>
+            <div class="live-content">
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-gdp">&mdash;</div>
+                        <div class="label"><span id="kpi-gdp-label">GDP</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Gross Domestic Product. Use the toggle above the chart to switch between constant 2015 US$, PPP (2021 international $), or nominal values. Source: World Bank.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-gdp-growth">&mdash;</div>
+                        <div class="label"><span id="kpi-gdp-growth-label">GDP Growth</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Annual percentage growth rate of real GDP. Source: World Bank.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-gni-pc">&mdash;</div>
+                        <div class="label"><span id="kpi-gni-pc-label">GNI per Capita</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Gross National Income per capita (Atlas method, current US$).</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-debt">&mdash;</div>
+                        <div class="label"><span id="kpi-debt-label">External Debt</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Total external debt stocks in current US dollars.</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+                        <button class="gdp-toggle active" data-gdp="real">Constant 2015 US$</button>
+                        <button class="gdp-toggle" data-gdp="ppp">PPP (Constant 2021 Int'l $)</button>
+                        <button class="gdp-toggle" data-gdp="nominal">Nominal (Current US$)</button>
+                    </div>
+                    <div id="chart-gdp"></div>
+                </div>
+                <div class="chart-card"><div id="chart-trade"></div></div>
+                <div class="chart-card"><div id="chart-inflation-deflator"></div></div>
+            </div>
+        </div>
+    </div> <!-- /tab-economy loading wrapper -->
+    </div> <!-- /sub-economy -->
+
+        <!-- SUB-TAB: POPULATION & CONFLICT -->
+        <div id="sub-popconflict" class="sub-content">
+        <div id="tab-popconflict" class="loading">
+        <div class="container">
+            <div class="skeleton">
+                <div class="kpi-row">
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                </div>
+                <div class="skeleton-bar skeleton-chart"></div>
+                <div class="skeleton-bar skeleton-chart"></div>
+            </div>
+            <div class="live-content">
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-pop">&mdash;</div>
+                        <div class="label"><span id="kpi-pop-label">Population</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Total population estimate. Source: World Bank / UN Population Division.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-netmig">&mdash;</div>
+                        <div class="label"><span id="kpi-netmig-label">Net Migration</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Net number of migrants (immigrants minus emigrants). Positive = more people entering.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-life">&mdash;</div>
+                        <div class="label"><span id="kpi-life-label">Life Expectancy</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Life expectancy at birth, total (years).</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-battle">&mdash;</div>
+                        <div class="label"><span id="kpi-battle-label">Battle Deaths</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Battle-related deaths (number of people). Source: Uppsala Conflict Data / World Bank.</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card"><div id="chart-population"></div></div>
+                <div class="chart-card"><div id="chart-conflict"></div></div>
+                <div class="chart-card"><div id="chart-health"></div></div>
+            </div>
+        </div>
+    </div> <!-- /tab-popconflict loading wrapper -->
+    </div> <!-- /sub-popconflict -->
+    </div> <!-- /tab-wb -->
+
     <div class="footer">
-        Data source: <a href="https://scpr-syria.org/publications/bulletins/" target="_blank">Syrian Center for Policy Research (SCPR)</a>
+        Data sources: <a href="https://scpr-syria.org/publications/bulletins/" target="_blank">SCPR</a> (CPI &amp; Wages)
+        &middot; <a href="https://data.worldbank.org/country/syrian-arab-republic" target="_blank">World Bank Open Data</a> (Economy &amp; Population)
         &middot; Base year: 2021 = 100
     </div>
 
@@ -485,12 +640,20 @@
         document.documentElement.setAttribute("data-theme", next);
         localStorage.setItem("syria-dash-theme", next);
         updateThemeIcon();
-        if (_data) {
-            var active = document.querySelector(".tab-btn.active");
-            if (active.dataset.tab === "tab-cpi") renderCPI();
-            else renderWages();
-        }
+        var active = document.querySelector(".tab-btn.active");
+        if (active) reRenderActiveTab(active.dataset.tab);
     });
+
+    function reRenderActiveTab(tab) {
+        if (tab === "tab-cpi" && _data) renderCPI();
+        else if (tab === "tab-wages" && _data) renderWages();
+        else if (tab === "tab-wb") {
+            var activeSub = document.querySelector(".sub-tab-btn.active");
+            var s = activeSub ? activeSub.dataset.sub : "sub-economy";
+            if (s === "sub-economy" && _wbEconReady) renderEconomy();
+            else if (s === "sub-popconflict" && _wbPopReady) renderPopConflict();
+        }
+    }
 
     /* ========== Helpers ========== */
     function fmtDate(d) {
@@ -541,8 +704,27 @@
             document.querySelectorAll(".tab-content").forEach(function (c) { c.classList.remove("active"); });
             btn.classList.add("active");
             document.getElementById(btn.dataset.tab).classList.add("active");
-            if (btn.dataset.tab === "tab-cpi") renderCPI();
-            else renderWages();
+            var t = btn.dataset.tab;
+            if (t === "tab-cpi") renderCPI();
+            else if (t === "tab-wages") renderWages();
+            else if (t === "tab-wb") {
+                var activeSub = document.querySelector(".sub-tab-btn.active");
+                var s = activeSub ? activeSub.dataset.sub : "sub-economy";
+                if (s === "sub-economy") initEconomy();
+                else if (s === "sub-popconflict") initPopConflict();
+            }
+        });
+    });
+
+    /* Sub-tab switching inside World Bank macrotab */
+    document.querySelectorAll(".sub-tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            document.querySelectorAll(".sub-tab-btn").forEach(function (b) { b.classList.remove("active"); });
+            document.querySelectorAll(".sub-content").forEach(function (c) { c.classList.remove("active"); });
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.sub).classList.add("active");
+            if (btn.dataset.sub === "sub-economy") initEconomy();
+            else if (btn.dataset.sub === "sub-popconflict") initPopConflict();
         });
     });
 
@@ -770,6 +952,290 @@
         }
         document.getElementById("freshness-text").textContent = txt;
         document.getElementById("freshness-badge").style.display = "inline-block";
+    }
+
+    /* ========================================================
+       WORLD BANK API — Economy & Population tabs
+       ======================================================== */
+    var WB_API = "https://api.worldbank.org/v2/country/SYR/indicator/";
+    var WB_PARAMS = "?format=json&date=2010:2026&per_page=100";
+    var _wbCache = {};  /* indicator code → [{year, value}] */
+    var _wbEconReady = false;
+    var _wbPopReady = false;
+
+    /** Fetch a single WB indicator. Returns promise of [{year,value}] sorted by year. */
+    function fetchWB(code) {
+        if (_wbCache[code]) return Promise.resolve(_wbCache[code]);
+        return fetch(WB_API + code + WB_PARAMS)
+            .then(function (r) { return r.json(); })
+            .then(function (json) {
+                if (!json || json.length < 2 || !json[1]) return [];
+                var pts = json[1]
+                    .filter(function (d) { return d.value !== null; })
+                    .map(function (d) { return { year: parseInt(d.date), value: d.value }; })
+                    .sort(function (a, b) { return a.year - b.year; });
+                _wbCache[code] = pts;
+                return pts;
+            })
+            .catch(function () { return []; });
+    }
+
+    /** Fetch multiple indicators in parallel */
+    function fetchWBMulti(codes) {
+        return Promise.all(codes.map(fetchWB));
+    }
+
+    function wbLatest(pts) { return pts.length ? pts[pts.length - 1] : null; }
+    function fmtB(v) { return "$" + (v / 1e9).toFixed(1) + "B"; }
+    function fmtM(v) { return (v / 1e6).toFixed(1) + "M"; }
+    function fmtK(v) {
+        if (Math.abs(v) >= 1e6) return fmtM(v);
+        if (Math.abs(v) >= 1e3) return (v / 1e3).toFixed(0) + "K";
+        return v.toLocaleString("en-US");
+    }
+
+    /* ---------- ECONOMY TAB ---------- */
+    var ECON_CODES = [
+        "NY.GDP.MKTP.KD",       /* GDP constant 2015 US$ */
+        "NY.GDP.MKTP.PP.KD",    /* GDP, PPP constant 2021 int'l $ */
+        "NY.GDP.MKTP.CD",       /* GDP nominal current US$ */
+        "NY.GDP.MKTP.KD.ZG",    /* GDP growth (annual %) */
+        "NY.GNP.PCAP.CD",       /* GNI per capita Atlas */
+        "DT.DOD.DECT.CD",       /* External debt */
+        "NE.EXP.GNFS.ZS",       /* Exports % GDP */
+        "NE.IMP.GNFS.ZS",       /* Imports % GDP */
+        "NY.GDP.DEFL.KD.ZG"     /* Inflation GDP deflator */
+    ];
+
+    var _gdpMode = "real"; /* "real", "ppp", or "nominal" */
+
+    function initEconomy() {
+        if (_wbEconReady) { renderEconomy(); return; }
+        fetchWBMulti(ECON_CODES).then(function () {
+            _wbEconReady = true;
+            document.getElementById("tab-economy").classList.remove("loading");
+            renderEconomy();
+        });
+    }
+
+    function renderEconomy() {
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        var gni = _wbCache["NY.GNP.PCAP.CD"] || [];
+        var debt = _wbCache["DT.DOD.DECT.CD"] || [];
+        var exp = _wbCache["NE.EXP.GNFS.ZS"] || [];
+        var imp = _wbCache["NE.IMP.GNFS.ZS"] || [];
+        var defl = _wbCache["NY.GDP.DEFL.KD.ZG"] || [];
+
+        /* KPIs — use selected GDP mode */
+        var gdpCode = _gdpMode === "ppp" ? "NY.GDP.MKTP.PP.KD" : (_gdpMode === "nominal" ? "NY.GDP.MKTP.CD" : "NY.GDP.MKTP.KD");
+        var gdpSrc = _wbCache[gdpCode] || [];
+        var gdpGr = _wbCache["NY.GDP.MKTP.KD.ZG"] || [];
+        var gdpLabel = _gdpMode === "ppp" ? "GDP PPP" : (_gdpMode === "nominal" ? "GDP Nominal" : "Real GDP");
+        var lg = wbLatest(gdpSrc);
+        if (lg) { document.getElementById("kpi-gdp").textContent = fmtB(lg.value); document.getElementById("kpi-gdp-label").textContent = gdpLabel + " (" + lg.year + ")"; }
+        var lgg = wbLatest(gdpGr);
+        if (lgg) { var v = lgg.value; document.getElementById("kpi-gdp-growth").textContent = (v > 0 ? "+" : "") + v.toFixed(2) + "%"; document.getElementById("kpi-gdp-growth").style.color = v > 0 ? "#43A047" : "#E53935"; document.getElementById("kpi-gdp-growth-label").textContent = "Real GDP Growth (" + lgg.year + ")"; }
+        var lgni = wbLatest(gni);
+        if (lgni) { document.getElementById("kpi-gni-pc").textContent = "$" + lgni.value.toFixed(0); document.getElementById("kpi-gni-pc-label").textContent = "GNI per Capita (" + lgni.year + ")"; }
+        var ld = wbLatest(debt);
+        if (ld) { document.getElementById("kpi-debt").textContent = fmtB(ld.value); document.getElementById("kpi-debt-label").textContent = "External Debt (" + ld.year + ")"; }
+
+        /* Chart 1: GDP with bar + growth line */
+        renderGDPChart(isDark);
+
+        /* Chart 2: Trade — Exports & Imports as % GDP */
+        var expYears = exp.map(function(p){return p.year.toString();});
+        var expVals = exp.map(function(p){return p.value;});
+        var impYears = imp.map(function(p){return p.year.toString();});
+        var impVals = imp.map(function(p){return p.value;});
+
+        Plotly.newPlot("chart-trade", [
+            { x: expYears, y: expVals, mode: "lines+markers", name: "Exports (% GDP)", line: { color: "#43A047", width: 2.5 }, marker: { size: 6 }, fill: "tozeroy", fillcolor: isDark ? "rgba(67,160,71,0.1)" : "rgba(67,160,71,0.06)", hovertemplate: "%{x}<br>Exports: %{y:.2f}%<extra></extra>" },
+            { x: impYears, y: impVals, mode: "lines+markers", name: "Imports (% GDP)", line: { color: "#E53935", width: 2.5 }, marker: { size: 6 }, fill: "tozeroy", fillcolor: isDark ? "rgba(229,57,53,0.08)" : "rgba(229,57,53,0.04)", hovertemplate: "%{x}<br>Imports: %{y:.2f}%<extra></extra>" }
+        ], applyTheme({
+            title: { text: "Trade as % of GDP \u2014 Exports vs Imports", font: { size: 18 } },
+            yaxis: { title: "% of GDP" },
+            xaxis: { title: "" },
+            height: 400, margin: { l: 60, r: 30, t: 60, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: -0.12 }
+        }), PLOTLY_CFG);
+
+        /* Chart 3: Inflation deflator */
+        var defYears = defl.map(function(p){return p.year.toString();});
+        var defVals = defl.map(function(p){return p.value;});
+        var defColors = defl.map(function(p){return p.value > 0 ? "#E53935" : "#43A047";});
+
+        Plotly.newPlot("chart-inflation-deflator", [{
+            x: defYears, y: defVals, type: "bar",
+            marker: { color: defColors }, name: "Inflation",
+            hovertemplate: "%{x}<br>Deflator: %{y:.2f}%<extra></extra>"
+        }], applyTheme({
+            title: { text: "GDP Deflator (Annual %)", font: { size: 18 } },
+            yaxis: { title: "Annual %" },
+            xaxis: { title: "" },
+            height: 440, margin: { l: 60, r: 30, t: 80, b: 40 },
+            hovermode: "x unified",
+            shapes: [{ type: "line", x0: 0, x1: 1, xref: "paper", y0: 0, y1: 0, line: { color: isDark ? "#555" : "black", width: 1 } }],
+            annotations: [{
+                text: "The GDP deflator measures the ratio of nominal to real GDP.<br>Unlike CPI (which tracks consumer prices), it covers all goods &amp; services produced domestically.",
+                xref: "paper", yref: "paper", x: 0.5, y: 1.01, xanchor: "center", yanchor: "bottom",
+                showarrow: false, font: { size: 12, color: isDark ? "#aaa" : "#666" }
+            }]
+        }), PLOTLY_CFG);
+    }
+
+    /** Render GDP chart based on current _gdpMode */
+    function renderGDPChart(isDark) {
+        if (typeof isDark === "undefined") isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        var gdpCode = _gdpMode === "ppp" ? "NY.GDP.MKTP.PP.KD" : (_gdpMode === "nominal" ? "NY.GDP.MKTP.CD" : "NY.GDP.MKTP.KD");
+        var gdpData = _wbCache[gdpCode] || [];
+        var gdpGr = _wbCache["NY.GDP.MKTP.KD.ZG"] || [];
+
+        var gdpYears = gdpData.map(function(p){return p.year.toString();});
+        var gdpVals = gdpData.map(function(p){return p.value / 1e9;});
+        var grYears = gdpGr.map(function(p){return p.year.toString();});
+        var grVals = gdpGr.map(function(p){return Math.round(p.value * 100) / 100;});
+
+        var LABELS = {
+            real:    { bar: "Real GDP ($B)",    hover: "%{x}<br>Real GDP: $%{y:.2f}B<extra></extra>",    title: "GDP (Constant 2015 US$) & Annual Growth Rate",           y: "Real GDP (Billion 2015 US$)" },
+            ppp:     { bar: "GDP PPP ($B)",     hover: "%{x}<br>GDP PPP: $%{y:.2f}B<extra></extra>",     title: "GDP, PPP (Constant 2021 Int'l $) & Annual Growth Rate", y: "GDP PPP (Billion 2021 Int'l $)" },
+            nominal: { bar: "GDP Nominal ($B)", hover: "%{x}<br>GDP Nominal: $%{y:.2f}B<extra></extra>", title: "GDP (Current US$) & Annual Growth Rate",                 y: "GDP Nominal (Billion US$)" }
+        };
+        var L = LABELS[_gdpMode];
+
+        Plotly.newPlot("chart-gdp", [
+            { x: gdpYears, y: gdpVals, type: "bar", name: L.bar, marker: { color: "#42a5f5" }, yaxis: "y", hovertemplate: L.hover },
+            { x: grYears, y: grVals, mode: "lines+markers", name: "Real Growth (%)", line: { color: "#FF9800", width: 2.5 }, marker: { size: 7 }, yaxis: "y2", hovertemplate: "%{x}<br>Growth: %{y:+.2f}%<extra></extra>" }
+        ], applyTheme({
+            title: { text: L.title, font: { size: 18 } },
+            yaxis: { title: L.y, side: "left", hoverformat: ".2f" },
+            yaxis2: { title: "Real Growth (%)", overlaying: "y", side: "right", zeroline: true, zerolinecolor: isDark ? "#555" : "#ccc", hoverformat: "+.2f" },
+            xaxis: { title: "" },
+            height: 440, margin: { l: 70, r: 70, t: 60, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: -0.12 },
+            bargap: 0.35
+        }), PLOTLY_CFG);
+    }
+
+    /* GDP toggle buttons */
+    document.querySelectorAll(".gdp-toggle").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            document.querySelectorAll(".gdp-toggle").forEach(function(b){ b.classList.remove("active"); });
+            btn.classList.add("active");
+            _gdpMode = btn.dataset.gdp;
+            if (_wbEconReady) renderEconomy();
+        });
+    });
+
+    /* ---------- POPULATION & CONFLICT TAB ---------- */
+    var POP_CODES = [
+        "SP.POP.TOTL",          /* Population total */
+        "SP.POP.GROW",          /* Pop growth % */
+        "SM.POP.NETM",          /* Net migration */
+        "SP.DYN.LE00.IN",       /* Life expectancy */
+        "VC.BTL.DETH",          /* Battle deaths */
+        "SH.DYN.MORT",          /* Under-5 mortality */
+        "SH.IMM.MEAS",          /* Immunization measles */
+        "DT.ODA.ALLD.CD"        /* ODA received */
+    ];
+
+    function initPopConflict() {
+        if (_wbPopReady) { renderPopConflict(); return; }
+        fetchWBMulti(POP_CODES).then(function () {
+            _wbPopReady = true;
+            document.getElementById("tab-popconflict").classList.remove("loading");
+            renderPopConflict();
+        });
+    }
+
+    function renderPopConflict() {
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        var pop = _wbCache["SP.POP.TOTL"] || [];
+        var popGr = _wbCache["SP.POP.GROW"] || [];
+        var netMig = _wbCache["SM.POP.NETM"] || [];
+        var lifeExp = _wbCache["SP.DYN.LE00.IN"] || [];
+        var battle = _wbCache["VC.BTL.DETH"] || [];
+        var u5mort = _wbCache["SH.DYN.MORT"] || [];
+        var immun = _wbCache["SH.IMM.MEAS"] || [];
+        var oda = _wbCache["DT.ODA.ALLD.CD"] || [];
+
+        /* KPIs */
+        var lp = wbLatest(pop);
+        if (lp) { document.getElementById("kpi-pop").textContent = fmtM(lp.value); document.getElementById("kpi-pop-label").textContent = "Population (" + lp.year + ")"; }
+        var lm = wbLatest(netMig);
+        if (lm) { var mv = lm.value; document.getElementById("kpi-netmig").textContent = (mv > 0 ? "+" : "") + fmtK(mv); document.getElementById("kpi-netmig").style.color = mv > 0 ? "#43A047" : "#E53935"; document.getElementById("kpi-netmig-label").textContent = "Net Migration (" + lm.year + ")"; }
+        var ll = wbLatest(lifeExp);
+        if (ll) { document.getElementById("kpi-life").textContent = ll.value.toFixed(2) + " yrs"; document.getElementById("kpi-life-label").textContent = "Life Expectancy (" + ll.year + ")"; }
+        var lb = wbLatest(battle);
+        if (lb) { document.getElementById("kpi-battle").textContent = lb.value.toLocaleString("en-US"); document.getElementById("kpi-battle").style.color = "#E53935"; document.getElementById("kpi-battle-label").textContent = "Battle Deaths (" + lb.year + ")"; }
+
+        /* Chart 1: Population bar + growth line */
+        var popYears = pop.map(function(p){return p.year.toString();});
+        var popVals = pop.map(function(p){return p.value / 1e6;});
+        var pgYears = popGr.map(function(p){return p.year.toString();});
+        var pgVals = popGr.map(function(p){return Math.round(p.value * 100) / 100;});
+
+        Plotly.newPlot("chart-population", [
+            { x: popYears, y: popVals, type: "bar", name: "Population (M)", marker: { color: "#42a5f5" }, yaxis: "y", hovertemplate: "%{x}<br>Pop: %{y:.2f}M<extra></extra>" },
+            { x: pgYears, y: pgVals, mode: "lines+markers", name: "Growth (%)", line: { color: "#FF9800", width: 2.5 }, marker: { size: 7 }, yaxis: "y2", hovertemplate: "%{x}<br>Growth: %{y:+.2f}%<extra></extra>" }
+        ], applyTheme({
+            title: { text: "Population & Annual Growth Rate", font: { size: 18 } },
+            yaxis: { title: "Population (Millions)", hoverformat: ".2f" },
+            yaxis2: { title: "Growth (%)", overlaying: "y", side: "right", zeroline: true, zerolinecolor: isDark ? "#555" : "#ccc", hoverformat: "+.2f" },
+            xaxis: { title: "" },
+            height: 440, margin: { l: 70, r: 70, t: 60, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: -0.12 },
+            bargap: 0.35
+        }), PLOTLY_CFG);
+
+        /* Chart 2: Conflict — battle deaths + net migration + ODA */
+        var batYears = battle.map(function(p){return p.year.toString();});
+        var batVals = battle.map(function(p){return p.value;});
+        var migYears = netMig.map(function(p){return p.year.toString();});
+        var migVals = netMig.map(function(p){return p.value;});
+        var odaYears = oda.map(function(p){return p.year.toString();});
+        var odaVals = oda.map(function(p){return p.value / 1e9;});
+
+        Plotly.newPlot("chart-conflict", [
+            { x: batYears, y: batVals, type: "bar", name: "Battle Deaths", marker: { color: "#E53935", opacity: 0.8 }, yaxis: "y", hovertemplate: "%{x}<br>Deaths: %{y:,.0f}<extra></extra>" },
+            { x: migYears, y: migVals, mode: "lines+markers", name: "Net Migration", line: { color: "#43A047", width: 2.5 }, marker: { size: 6 }, yaxis: "y", hovertemplate: "%{x}<br>Net Mig: %{y:+,.0f}<extra></extra>" },
+            { x: odaYears, y: odaVals, mode: "lines+markers", name: "ODA ($B)", line: { color: "#9C27B0", width: 2, dash: "dot" }, marker: { size: 6 }, yaxis: "y2", hovertemplate: "%{x}<br>ODA: $%{y:.2f}B<extra></extra>" }
+        ], applyTheme({
+            title: { text: "Conflict Indicators \u2014 Battle Deaths, Net Migration & ODA", font: { size: 18 } },
+            yaxis: { title: "People" },
+            yaxis2: { title: "ODA (Billion US$)", overlaying: "y", side: "right", hoverformat: ".2f" },
+            xaxis: { title: "" },
+            height: 460, margin: { l: 80, r: 80, t: 80, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: -0.12 },
+            annotations: [{
+                text: "ODA = Official Development Assistance \u2014 grants and concessional loans from donor governments to support development.",
+                xref: "paper", yref: "paper", x: 0.5, y: 1.01, xanchor: "center", yanchor: "bottom",
+                showarrow: false, font: { size: 12, color: isDark ? "#aaa" : "#666" }
+            }]
+        }), PLOTLY_CFG);
+
+        /* Chart 3: Health — Under-5 mortality + Immunization */
+        var u5Years = u5mort.map(function(p){return p.year.toString();});
+        var u5Vals = u5mort.map(function(p){return p.value;});
+        var immYears = immun.map(function(p){return p.year.toString();});
+        var immVals = immun.map(function(p){return p.value;});
+
+        Plotly.newPlot("chart-health", [
+            { x: u5Years, y: u5Vals, mode: "lines+markers", name: "Under-5 Mortality (per 1K)", line: { color: "#E53935", width: 2.5 }, marker: { size: 6 }, yaxis: "y", hovertemplate: "%{x}<br>U5 Mortality: %{y:.2f}<extra></extra>" },
+            { x: immYears, y: immVals, mode: "lines+markers", name: "Measles Immunization (%)", line: { color: "#43A047", width: 2.5 }, marker: { size: 6 }, yaxis: "y2", hovertemplate: "%{x}<br>Immunization: %{y:.0f}%<extra></extra>" }
+        ], applyTheme({
+            title: { text: "Health Indicators \u2014 Child Mortality & Immunization", font: { size: 18 } },
+            yaxis: { title: "Under-5 Mortality (per 1,000)", rangemode: "tozero" },
+            yaxis2: { title: "Immunization Coverage (%)", overlaying: "y", side: "right", range: [0, 100] },
+            xaxis: { title: "" },
+            height: 400, margin: { l: 60, r: 60, t: 60, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: -0.12 }
+        }), PLOTLY_CFG);
     }
 
     /* ========== Init ========== */
