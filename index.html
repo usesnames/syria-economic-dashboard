@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Syria Economic Dashboard</title>
-    <meta name="description" content="Syria Economic Dashboard — Consumer Price Index, Inflation & Wages data from SCPR monthly bulletins.">
+    <meta name="description" content="Syria Economic Dashboard — CPI, Inflation, Wages, World Bank Indicators & UNHCR Refugee Data.">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316213e'/%3E%3Crect x='10' y='34' width='10' height='20' rx='2' fill='%2342a5f5'/%3E%3Crect x='27' y='22' width='10' height='32' rx='2' fill='%2342a5f5'/%3E%3Crect x='44' y='12' width='10' height='42' rx='2' fill='%2342a5f5'/%3E%3C/svg%3E">
     <!-- Prevent dark-mode flash: apply saved theme before paint -->
     <script>
         (function(){var t=localStorage.getItem("syria-dash-theme");if(t)document.documentElement.setAttribute("data-theme",t);else if(window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)").matches)document.documentElement.setAttribute("data-theme","dark");})();
@@ -360,7 +362,7 @@
             <span id="theme-icon">&#9790;</span>
         </button>
         <h1>Syria in Numbers</h1>
-        <p>Economic Dashboard &mdash; CPI, Inflation, Wages &amp; World Bank Indicators</p>
+        <p>Economic Dashboard &mdash; CPI, Inflation, Wages, World Bank Indicators &amp; UNHCR Refugee Data</p>
         <div class="freshness" id="freshness-badge" style="display:none">
             <span class="dot" id="freshness-dot"></span>
             <span id="freshness-text"></span>
@@ -371,6 +373,7 @@
         <button class="tab-btn active" data-tab="tab-cpi">Consumer Price Index</button>
         <button class="tab-btn" data-tab="tab-wages">Average Wages</button>
         <button class="tab-btn" data-tab="tab-wb">World Bank Data</button>
+        <button class="tab-btn" data-tab="tab-refugees">Refugees</button>
     </div>
 
     <!-- ==================== TAB 1: CPI ==================== -->
@@ -620,10 +623,60 @@
     </div> <!-- /sub-popconflict -->
     </div> <!-- /tab-wb -->
 
+    <!-- ==================== TAB 4: UNHCR REFUGEES ==================== -->
+    <div id="tab-refugees" class="tab-content">
+    <div id="refugees-loader" class="loading">
+        <div class="container">
+            <div class="skeleton">
+                <div class="kpi-row">
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                </div>
+                <div class="skeleton-bar skeleton-chart"></div>
+                <div class="skeleton-bar skeleton-chart"></div>
+                <div class="skeleton-bar skeleton-chart"></div>
+            </div>
+            <div class="live-content">
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-ref-total">&mdash;</div>
+                        <div class="label"><span id="kpi-ref-total-label">Registered Refugees</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Total registered Syrian refugees across all host countries. Source: UNHCR Operational Data Portal.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-ref-top" style="font-size:1.5rem">&mdash;</div>
+                        <div class="label"><span id="kpi-ref-top-label">Top Host Country</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Country hosting the largest number of registered Syrian refugees.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-ref-resettle">&mdash;</div>
+                        <div class="label"><span id="kpi-ref-resettle-label">Resettlement</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Resettlement is the transfer of refugees from the host country where they sought asylum to a third country that has agreed to admit them with permanent residence status. It is one of three durable solutions (alongside voluntary repatriation and local integration). Numbers reflect UNHCR submissions to resettlement countries.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-ref-returns">&mdash;</div>
+                        <div class="label"><span id="kpi-ref-returns-label">Self-Organized Returns</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Number of Syrian refugees who self-organized their return to Syria in the latest available year.</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card"><div id="chart-ref-bycountry"></div></div>
+                <div class="chart-card"><div id="chart-ref-demography"></div></div>
+                <div class="chart-card"><div id="chart-ref-timeseries"></div></div>
+            </div>
+        </div>
+    </div>
+    </div> <!-- /tab-refugees -->
+
     <div class="footer">
-        Data sources: <a href="https://scpr-syria.org/publications/bulletins/" target="_blank">SCPR</a> (CPI &amp; Wages)
+        Data sources: <a href="https://scpr-syria.org/publications/bulletins/" target="_blank">SCPR</a> (CPI &amp; Wages &mdash; base year 2021&nbsp;=&nbsp;100)
         &middot; <a href="https://data.worldbank.org/country/syrian-arab-republic" target="_blank">World Bank Open Data</a> (Economy &amp; Population)
-        &middot; Base year: 2021 = 100
+        &middot; <a href="https://data.unhcr.org/en/situations/syria" target="_blank">UNHCR</a> (Refugees)
     </div>
 
     <script>
@@ -653,6 +706,7 @@
             if (s === "sub-economy" && _wbEconReady) renderEconomy();
             else if (s === "sub-popconflict" && _wbPopReady) renderPopConflict();
         }
+        else if (tab === "tab-refugees" && _unhcrReady) renderRefugees();
     }
 
     /* ========== Helpers ========== */
@@ -705,6 +759,9 @@
             btn.classList.add("active");
             document.getElementById(btn.dataset.tab).classList.add("active");
             var t = btn.dataset.tab;
+            /* Freshness badge is SCPR-only (CPI & Wages) */
+            var fb = document.getElementById("freshness-badge");
+            if (fb) fb.style.display = (t === "tab-cpi" || t === "tab-wages") ? "inline-block" : "none";
             if (t === "tab-cpi") renderCPI();
             else if (t === "tab-wages") renderWages();
             else if (t === "tab-wb") {
@@ -713,6 +770,7 @@
                 if (s === "sub-economy") initEconomy();
                 else if (s === "sub-popconflict") initPopConflict();
             }
+            else if (t === "tab-refugees") initRefugees();
         });
     });
 
@@ -1236,6 +1294,233 @@
             hovermode: "x unified",
             legend: { orientation: "h", y: -0.12 }
         }), PLOTLY_CFG);
+    }
+
+    /* ========================================================
+       UNHCR REFUGEE DATA — Tab 4
+       ======================================================== */
+    var UNHCR_BASE = "https://data.unhcr.org/population/";
+    var _unhcrReady = false;
+    var _unhcrData = {};  /* total, countries, resettlement, returns, demography */
+
+    function fetchUNHCR(endpoint, key) {
+        if (_unhcrData[key]) return Promise.resolve(_unhcrData[key]);
+        return fetch(UNHCR_BASE + endpoint)
+            .then(function (r) { return r.json(); })
+            .then(function (json) { _unhcrData[key] = json; return json; })
+            .catch(function () { return null; });
+    }
+
+    function initRefugees() {
+        if (_unhcrReady) { renderRefugees(); return; }
+        Promise.all([
+            fetchUNHCR("?widget_id=583862&sv_id=4&population_collection=22", "total"),
+            fetchUNHCR("get/sublocation?widget_id=583863&sv_id=4&population_collection=24&forcesublocation=0&fromDate=1900-01-01", "countries"),
+            fetchUNHCR("get/timeseries?widget_id=583879&sv_id=4&population_group=5112&frequency=year&fromDate=1900-01-01", "resettlement"),
+            fetchUNHCR("get/timeseries?widget_id=583881&sv_id=4&population_group=5110&frequency=year&fromDate=1900-01-01", "returns"),
+            fetchUNHCR("get/demography?widget_id=583866&sv_id=4&population_collection=24", "demography")
+        ]).then(function () {
+            _unhcrReady = true;
+            document.getElementById("refugees-loader").classList.remove("loading");
+            renderRefugees();
+        });
+    }
+
+    function renderRefugees() {
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        var total = _unhcrData.total;
+        var countries = _unhcrData.countries;
+        var resettlement = _unhcrData.resettlement;
+        var returns = _unhcrData.returns;
+        var demography = _unhcrData.demography;
+
+        /* ---- KPIs ---- */
+        if (total && total.data && total.data.length > 0) {
+            var t = total.data[0];
+            var totalInd = parseInt(t.individuals) || 0;
+            document.getElementById("kpi-ref-total").textContent = (totalInd / 1e6).toFixed(2) + "M";
+            var dateStr = t.date || "";
+            if (dateStr) {
+                var parts = dateStr.split("-");
+                var yr = parts[0]; var mo = parseInt(parts[1]);
+                var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                document.getElementById("kpi-ref-total-label").textContent = "Registered Refugees (" + months[mo - 1] + " " + yr + ")";
+            }
+        }
+
+        if (countries && countries.data && countries.data.length > 0) {
+            var sorted = countries.data.slice().sort(function (a, b) { return parseInt(b.individuals) - parseInt(a.individuals); });
+            var top = sorted[0];
+            var topName = top.geomaster_name || top.name || "—";
+            var topVal = parseInt(top.individuals) || 0;
+            document.getElementById("kpi-ref-top").textContent = topName.replace("ü", "ü") + " (" + (topVal / 1e6).toFixed(2) + "M)";
+            document.getElementById("kpi-ref-top-label").textContent = "Top Host Country";
+        }
+
+        var _resTS = (resettlement && resettlement.data && resettlement.data.timeseries) ? resettlement.data.timeseries : [];
+        var _retTS = (returns && returns.data && returns.data.timeseries) ? returns.data.timeseries : [];
+
+        /** Extract year from a timeseries record (may have .year or .data_date) */
+        function _tsYear(r) {
+            if (r.year) return parseInt(r.year);
+            if (r.data_date) return parseInt(r.data_date.split("-")[0]);
+            return 0;
+        }
+        /** Human-readable label: "2024" or "2024 (through Nov)" if partial */
+        function _tsLabel(r) {
+            var yr = _tsYear(r);
+            if (r.data_date) {
+                var parts = r.data_date.split("-");
+                var mo = parseInt(parts[1]);
+                if (mo < 12) {
+                    var moNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                    return yr + " (through " + moNames[mo - 1] + ")";
+                }
+            }
+            return String(yr);
+        }
+
+        if (_resTS.length > 0) {
+            var resData = _resTS.slice().sort(function (a, b) { return _tsYear(a) - _tsYear(b); });
+            var lastRes = resData[resData.length - 1];
+            document.getElementById("kpi-ref-resettle").textContent = parseInt(lastRes.individuals).toLocaleString("en-US");
+            document.getElementById("kpi-ref-resettle").style.color = "#43A047";
+            document.getElementById("kpi-ref-resettle-label").textContent = "Resettlement (" + _tsLabel(lastRes) + ")";
+        }
+
+        if (_retTS.length > 0) {
+            var retData = _retTS.slice().sort(function (a, b) { return _tsYear(a) - _tsYear(b); });
+            var lastRet = retData[retData.length - 1];
+            document.getElementById("kpi-ref-returns").textContent = parseInt(lastRet.individuals).toLocaleString("en-US");
+            document.getElementById("kpi-ref-returns").style.color = "#FF9800";
+            document.getElementById("kpi-ref-returns-label").textContent = "Self-Organized Returns (" + _tsLabel(lastRet) + ")";
+        }
+
+        /* ---- Chart 1: Refugees by Host Country (horizontal bar) ---- */
+        if (countries && countries.data && countries.data.length > 0) {
+            var countryDate = countries.data[0].date || "";
+            var countryYear = countryDate ? countryDate.split("-")[0] : "";
+            var cSorted = countries.data.slice().sort(function (a, b) { return parseInt(a.individuals) - parseInt(b.individuals); });
+            var cNames = cSorted.map(function (c) { return c.geomaster_name || c.name || ""; });
+            var cVals = cSorted.map(function (c) { return parseInt(c.individuals) || 0; });
+            var cColors = cSorted.map(function (c, i) {
+                var palette = ["#42a5f5", "#66bb6a", "#ffa726", "#ef5350", "#ab47bc", "#26c6da", "#8d6e63", "#78909c"];
+                return palette[i % palette.length];
+            });
+
+            Plotly.newPlot("chart-ref-bycountry", [{
+                x: cVals, y: cNames,
+                type: "bar", orientation: "h",
+                marker: { color: cColors },
+                text: cVals.map(function (v) { return v >= 1e6 ? (v / 1e6).toFixed(2) + "M" : v >= 1e3 ? (v / 1e3).toFixed(0) + "K" : v.toString(); }),
+                textposition: "outside",
+                hovertemplate: "<b>%{y}</b><br>Refugees: %{x:,.0f}<extra></extra>",
+                cliponaxis: false
+            }], applyTheme({
+                title: { text: "Syrian Refugees by Host Country" + (countryYear ? " (" + countryYear + ")" : ""), font: { size: 18 } },
+                xaxis: { title: "Registered Refugees", tickformat: ",d" },
+                yaxis: { automargin: true },
+                height: 80 + cNames.length * 52,
+                margin: { l: 120, r: 80, t: 60, b: 50 },
+                hovermode: "closest"
+            }), PLOTLY_CFG);
+        }
+
+        /* ---- Chart 2: Demographics Pyramid ---- */
+        if (demography && demography.data && demography.data.length > 0) {
+            var d = demography.data[0];
+            var ageLabels = ["0-4", "5-11", "12-17", "18-59", "60+"];
+            var maleKeys = ["male_04", "male_511", "male_1217", "male_1859", "male_60"];
+            var femaleKeys = ["female_04", "female_511", "female_1217", "female_1859", "female_60"];
+            var maleVals = maleKeys.map(function (k) { return -(parseInt(d[k]) || 0); });
+            var femaleVals = femaleKeys.map(function (k) { return parseInt(d[k]) || 0; });
+
+            Plotly.newPlot("chart-ref-demography", [
+                {
+                    y: ageLabels, x: maleVals, type: "bar", orientation: "h",
+                    name: "Male", marker: { color: "#42a5f5" },
+                    hovertemplate: "<b>%{y}</b><br>Male: %{customdata:,.0f}<extra></extra>",
+                    customdata: maleVals.map(function (v) { return Math.abs(v); })
+                },
+                {
+                    y: ageLabels, x: femaleVals, type: "bar", orientation: "h",
+                    name: "Female", marker: { color: "#ef5350" },
+                    hovertemplate: "<b>%{y}</b><br>Female: %{x:,.0f}<extra></extra>"
+                }
+            ], applyTheme({
+                title: { text: "Refugee Demographics — Age & Gender Breakdown", font: { size: 18 } },
+                xaxis: {
+                    title: "Number of Refugees",
+                    tickvals: (function () {
+                        var maxVal = Math.max(Math.max.apply(null, femaleVals), Math.max.apply(null, maleVals.map(Math.abs)));
+                        var step = Math.ceil(maxVal / 4 / 100000) * 100000;
+                        var ticks = [];
+                        for (var i = -4; i <= 4; i++) ticks.push(i * step);
+                        return ticks;
+                    })(),
+                    ticktext: (function () {
+                        var maxVal = Math.max(Math.max.apply(null, femaleVals), Math.max.apply(null, maleVals.map(Math.abs)));
+                        var step = Math.ceil(maxVal / 4 / 100000) * 100000;
+                        var texts = [];
+                        for (var i = -4; i <= 4; i++) texts.push(Math.abs(i * step) >= 1e6 ? (Math.abs(i * step) / 1e6).toFixed(1) + "M" : (Math.abs(i * step) / 1e3).toFixed(0) + "K");
+                        return texts;
+                    })()
+                },
+                yaxis: { automargin: true },
+                barmode: "overlay",
+                height: 380,
+                margin: { l: 70, r: 30, t: 60, b: 50 },
+                hovermode: "closest",
+                legend: { orientation: "h", y: -0.15 },
+                bargap: 0.15
+            }), PLOTLY_CFG);
+        }
+
+        /* ---- Chart 3: Resettlement & Returns Timeseries ---- */
+        var resYears = [], resVals = [], retYears = [], retVals = [];
+        if (_resTS.length > 0) {
+            var rsd = _resTS.slice().sort(function (a, b) { return _tsYear(a) - _tsYear(b); });
+            resYears = rsd.map(function (r) { return String(_tsYear(r)); });
+            resVals = rsd.map(function (r) { return parseInt(r.individuals) || 0; });
+        }
+        if (_retTS.length > 0) {
+            var rtd = _retTS.slice().sort(function (a, b) { return _tsYear(a) - _tsYear(b); });
+            retYears = rtd.map(function (r) { return String(_tsYear(r)); });
+            retVals = rtd.map(function (r) { return parseInt(r.individuals) || 0; });
+        }
+
+        if (resYears.length > 0 || retYears.length > 0) {
+            var tsTraces = [];
+            if (resYears.length > 0) {
+                tsTraces.push({
+                    x: resYears, y: resVals, type: "bar",
+                    name: "Resettlement Submissions",
+                    marker: { color: "#43A047" },
+                    hovertemplate: "%{x}<br>Resettlement: %{y:,.0f}<extra></extra>"
+                });
+            }
+            if (retYears.length > 0) {
+                tsTraces.push({
+                    x: retYears, y: retVals,
+                    mode: "lines+markers",
+                    name: "Self-Organized Returns",
+                    line: { color: "#FF9800", width: 2.5 },
+                    marker: { size: 7 },
+                    hovertemplate: "%{x}<br>Returns: %{y:,.0f}<extra></extra>"
+                });
+            }
+
+            Plotly.newPlot("chart-ref-timeseries", tsTraces, applyTheme({
+                title: { text: "Resettlement Submissions & Self-Organized Returns by Year", font: { size: 18 } },
+                yaxis: { title: "People", tickformat: ",d" },
+                xaxis: { title: "" },
+                height: 420,
+                margin: { l: 80, r: 30, t: 60, b: 40 },
+                hovermode: "x unified",
+                legend: { orientation: "h", y: -0.12 },
+                bargap: 0.35
+            }), PLOTLY_CFG);
+        }
     }
 
     /* ========== Init ========== */
