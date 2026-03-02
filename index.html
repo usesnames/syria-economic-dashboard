@@ -1,34 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Syria Economic Dashboard</title>
+    <meta name="description" content="Syria Economic Dashboard — CPI, Inflation, Wages, World Bank Indicators & UNHCR Refugee Data.">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316213e'/%3E%3Crect x='10' y='34' width='10' height='20' rx='2' fill='%2342a5f5'/%3E%3Crect x='27' y='22' width='10' height='32' rx='2' fill='%2342a5f5'/%3E%3Crect x='44' y='12' width='10' height='42' rx='2' fill='%2342a5f5'/%3E%3C/svg%3E">
+    <!-- Prevent dark-mode flash: apply saved theme before paint -->
+    <script>
+        (function(){var t=localStorage.getItem("syria-dash-theme");if(t)document.documentElement.setAttribute("data-theme",t);else if(window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)").matches)document.documentElement.setAttribute("data-theme","dark");})();
+    </script>
     <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
     <style>
+        /* ====== CSS Custom Properties ====== */
+        :root {
+            --bg: #f5f7fa;
+            --bg-card: #ffffff;
+            --bg-tab-bar: #16213e;
+            --text: #1a1a2e;
+            --text-secondary: #666;
+            --text-label: #444;
+            --border: #ccc;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+            --accent: #1565C0;
+            --accent-light: #42a5f5;
+            --select-bg: #ffffff;
+            --skeleton-bg: #e0e0e0;
+            --skeleton-shine: #f0f0f0;
+            --tooltip-bg: #333;
+            --tooltip-text: #fff;
+            --plotly-bg: #ffffff;
+            --plotly-grid: #eee;
+            --plotly-text: #1a1a2e;
+            --zero-line: black;
+            --fill-alpha: 0.07;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f1117;
+            --bg-card: #1a1d28;
+            --bg-tab-bar: #161927;
+            --text: #e0e0e0;
+            --text-secondary: #aaa;
+            --text-label: #bbb;
+            --border: #333;
+            --shadow: 0 1px 4px rgba(0,0,0,0.35);
+            --accent: #42a5f5;
+            --accent-light: #64b5f6;
+            --select-bg: #252836;
+            --skeleton-bg: #252836;
+            --skeleton-shine: #333;
+            --tooltip-bg: #444;
+            --tooltip-text: #f0f0f0;
+            --plotly-bg: #1a1d28;
+            --plotly-grid: #333;
+            --plotly-text: #e0e0e0;
+            --zero-line: #666;
+            --fill-alpha: 0.12;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #f5f7fa;
-            color: #1a1a2e;
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
         }
+
+        /* ====== Header ====== */
         .header {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: white;
-            padding: 2.5rem 2rem 1.2rem;
+            padding: 2rem 2rem 1rem;
             text-align: center;
+            position: relative;
         }
-        .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.3rem; }
-        .header p { font-size: 1rem; opacity: 0.8; }
+        [data-theme="dark"] .header {
+            background: linear-gradient(135deg, #0f1117 0%, #161927 100%);
+        }
+        .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.2rem; }
+        .header p { font-size: 1rem; opacity: 0.8; margin-bottom: 0.4rem; }
 
-        /* --- Tabs --- */
+        /* Data freshness badge */
+        .freshness {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 20px;
+            padding: 0.22rem 0.9rem;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.72);
+            margin-top: 0.2rem;
+        }
+        .freshness .dot {
+            display: inline-block;
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #43A047;
+            margin-right: 0.4rem;
+            vertical-align: middle;
+        }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 1rem; right: 1.2rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 50%;
+            width: 38px; height: 38px;
+            cursor: pointer;
+            color: white;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .theme-toggle:hover { background: rgba(255,255,255,0.22); }
+
+        /* ====== Tabs ====== */
         .tab-bar {
             display: flex;
             justify-content: center;
-            background: #16213e;
+            background: var(--bg-tab-bar);
             padding: 0 1rem;
-            gap: 0;
         }
         .tab-btn {
             padding: 0.75rem 2rem;
@@ -43,18 +141,52 @@
             font-family: inherit;
         }
         .tab-btn:hover { color: rgba(255,255,255,0.85); }
-        .tab-btn.active {
-            color: white;
-            border-bottom-color: #42a5f5;
-        }
+        .tab-btn.active { color: white; border-bottom-color: #42a5f5; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 1.5rem 1rem;
+        /* GDP mode toggle */
+        .gdp-toggle {
+            padding: 6px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-card);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
         }
+        .gdp-toggle:hover { border-color: #42a5f5; color: var(--text); }
+        .gdp-toggle.active { background: #42a5f5; color: #fff; border-color: #42a5f5; }
+
+        /* Sub-tab bar inside World Bank macrotab */
+        .sub-tab-bar {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1rem 0;
+        }
+        .sub-tab-btn {
+            padding: 8px 22px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .sub-tab-btn:hover { border-color: #42a5f5; color: var(--text); }
+        .sub-tab-btn.active { background: #42a5f5; color: #fff; border-color: #42a5f5; }
+        .sub-content { display: none; }
+        .sub-content.active { display: block; }
+
+        /* ====== Layout ====== */
+        .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem; }
         .filters {
             display: flex;
             align-items: center;
@@ -63,168 +195,521 @@
             margin-bottom: 1.5rem;
             flex-wrap: wrap;
         }
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .filter-group label {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #444;
-        }
+        .filter-group { display: flex; align-items: center; gap: 0.5rem; }
+        .filter-group label { font-size: 0.95rem; font-weight: 600; color: var(--text-label); }
         .filter-group select {
             padding: 0.5rem 1rem;
             border-radius: 8px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--border);
             font-size: 0.95rem;
-            background: white;
-            color: #1a1a2e;
+            background: var(--select-bg);
+            color: var(--text);
             cursor: pointer;
             min-width: 200px;
+            transition: border-color 0.2s, background 0.3s, color 0.3s;
         }
         .filter-group select:focus {
             outline: none;
-            border-color: #1565C0;
+            border-color: var(--accent);
             box-shadow: 0 0 0 2px rgba(21,101,192,0.15);
         }
+
+        /* ====== KPI Cards ====== */
         .kpi-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
             margin-bottom: 2rem;
         }
         .kpi-card {
-            background: white;
+            background: var(--bg-card);
             border-radius: 12px;
             padding: 1.2rem 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            box-shadow: var(--shadow);
             text-align: center;
+            transition: background 0.3s, box-shadow 0.3s;
         }
-        .kpi-card .value { font-size: 2rem; font-weight: 700; color: #1565C0; }
-        .kpi-card .label { font-size: 0.85rem; color: #666; margin-top: 0.2rem; }
+        .kpi-card .value { font-size: 2rem; font-weight: 700; color: var(--accent); }
+        .kpi-card .label { font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem; }
+
+        /* ====== Info Tooltips ====== */
+        .info-icon {
+            display: inline-block;
+            width: 15px; height: 15px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            color: var(--bg-card);
+            font-size: 0.6rem;
+            font-weight: 700;
+            line-height: 15px;
+            text-align: center;
+            cursor: help;
+            margin-left: 0.3rem;
+            vertical-align: middle;
+            position: relative;
+            opacity: 0.45;
+            transition: opacity 0.2s;
+            font-style: normal;
+        }
+        .info-icon:hover, .info-icon:focus { opacity: 1; outline: none; }
+        .info-tip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--tooltip-bg);
+            color: var(--tooltip-text);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 400;
+            line-height: 1.4;
+            width: 220px;
+            text-align: left;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            pointer-events: none;
+        }
+        .info-tip::after {
+            content: '';
+            position: absolute;
+            top: 100%; left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--tooltip-bg);
+        }
+        .info-icon:hover .info-tip,
+        .info-icon:focus .info-tip { display: block; }
+
+        /* ====== Charts ====== */
         .chart-card {
-            background: white;
+            background: var(--bg-card);
             border-radius: 12px;
             padding: 1.2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            box-shadow: var(--shadow);
             margin-bottom: 1.5rem;
+            transition: background 0.3s, box-shadow 0.3s;
         }
+
+        /* ====== Skeleton Loader ====== */
+        .skeleton { display: none; }
+        .loading .skeleton { display: block; }
+        .loading .live-content { display: none; }
+        .skeleton-bar {
+            background: linear-gradient(90deg, var(--skeleton-bg) 25%, var(--skeleton-shine) 50%, var(--skeleton-bg) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        .skeleton-kpi { height: 80px; border-radius: 12px; }
+        .skeleton-chart { height: 380px; margin-bottom: 1.5rem; border-radius: 12px; }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ====== Footer ====== */
         .footer {
             text-align: center;
             padding: 1.5rem;
             font-size: 0.8rem;
-            color: #999;
+            color: var(--text-secondary);
         }
-        .footer a { color: #1565C0; text-decoration: none; }
+        .footer a { color: var(--accent); text-decoration: none; }
         .footer a:hover { text-decoration: underline; }
-        .error-msg {
-            text-align: center;
-            padding: 3rem;
-            color: #E53935;
-            font-size: 1.1rem;
+        .error-msg { text-align: center; padding: 3rem; color: #E53935; font-size: 1.1rem; }
+
+        /* ====== Responsive: Tablet ====== */
+        @media (max-width: 768px) {
+            .header { padding: 1.5rem 1rem 0.8rem; }
+            .header h1 { font-size: 1.5rem; }
+            .header p { font-size: 0.9rem; }
+            .theme-toggle { top: 0.7rem; right: 0.7rem; width: 34px; height: 34px; font-size: 1rem; }
+            .tab-btn { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
+            .filters { flex-direction: column; gap: 0.8rem; }
+            .filter-group { width: 100%; justify-content: center; }
+            .filter-group select { min-width: 0; flex: 1; max-width: 280px; }
+            .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
+            .kpi-card { padding: 1rem; }
+            .kpi-card .value { font-size: 1.5rem; }
+            .kpi-card .label { font-size: 0.78rem; }
+            .chart-card { padding: 0.8rem 0.5rem; }
+        }
+
+        /* ====== Responsive: Phone ====== */
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.25rem; }
+            .header p { font-size: 0.82rem; }
+            .tab-btn { padding: 0.5rem 0.7rem; font-size: 0.8rem; }
+            .kpi-row { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+            .kpi-card .value { font-size: 1.2rem; }
+            .kpi-card .label { font-size: 0.72rem; }
+            .container { padding: 1rem 0.5rem; }
+            .info-tip { width: 180px; font-size: 0.7rem; }
+            .freshness { font-size: 0.7rem; padding: 0.18rem 0.65rem; }
+        }
+
+        /* Touch devices: show tooltip on tap */
+        @media (hover: none) {
+            .info-icon { -webkit-tap-highlight-color: transparent; }
         }
     </style>
 </head>
 <body>
     <div class="header">
+        <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+            <span id="theme-icon">&#9790;</span>
+        </button>
         <h1>Syria in Numbers</h1>
-        <p>Economic Dashboard &mdash; CPI, Inflation &amp; Wages</p>
+        <p>Economic Dashboard &mdash; CPI, Inflation, Wages, World Bank Indicators &amp; UNHCR Refugee Data</p>
+        <div class="freshness" id="freshness-badge" style="display:none">
+            <span class="dot" id="freshness-dot"></span>
+            <span id="freshness-text"></span>
+        </div>
     </div>
 
-    <!-- Tab navigation -->
     <div class="tab-bar">
         <button class="tab-btn active" data-tab="tab-cpi">Consumer Price Index</button>
         <button class="tab-btn" data-tab="tab-wages">Average Wages</button>
+        <button class="tab-btn" data-tab="tab-wb">World Bank Data</button>
+        <button class="tab-btn" data-tab="tab-refugees">Refugees</button>
     </div>
 
     <!-- ==================== TAB 1: CPI ==================== -->
-    <div id="tab-cpi" class="tab-content active">
+    <div id="tab-cpi" class="tab-content active loading">
         <div class="container">
-            <div class="filters">
-                <div class="filter-group">
-                    <label for="region-select">Region:</label>
-                    <select id="region-select"></select>
+            <!-- Skeleton -->
+            <div class="skeleton">
+                <div style="display:flex;gap:0.8rem;justify-content:center;margin-bottom:1.2rem">
+                    <div class="skeleton-bar" style="width:140px;height:38px"></div>
+                    <div class="skeleton-bar" style="width:200px;height:38px"></div>
                 </div>
-                <div class="filter-group">
-                    <label for="commodity-select">Commodity:</label>
-                    <select id="commodity-select"></select>
+                <div class="kpi-row">
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
                 </div>
+                <div class="skeleton-bar skeleton-chart"></div>
+                <div class="skeleton-bar skeleton-chart"></div>
             </div>
-            <div class="kpi-row">
-                <div class="kpi-card">
-                    <div class="value" id="kpi-latest">&mdash;</div>
-                    <div class="label" id="kpi-latest-label">Latest CPI</div>
+
+            <!-- Live content -->
+            <div class="live-content">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="region-select">Region:</label>
+                        <select id="region-select"></select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="commodity-select">Commodity:</label>
+                        <select id="commodity-select"></select>
+                    </div>
                 </div>
-                <div class="kpi-card">
-                    <div class="value" id="kpi-mom">&mdash;</div>
-                    <div class="label">Last Monthly Change</div>
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-latest">&mdash;</div>
+                        <div class="label">
+                            <span id="kpi-latest-label">Latest CPI</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Consumer Price Index measures the average change in prices paid by consumers. Base year: 2021&nbsp;=&nbsp;100. Higher values indicate higher cost of living.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-mom">&mdash;</div>
+                        <div class="label">
+                            <span>Last Monthly Change</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Month-over-month percentage change compared to the previous month's CPI value.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-yoy">&mdash;</div>
+                        <div class="label">
+                            <span id="kpi-yoy-label">YoY Inflation</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Year-over-year inflation: percentage change compared to the same month one year earlier.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-total" style="color: #E53935">&mdash;</div>
+                        <div class="label">
+                            <span id="kpi-total-label">Total Change</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Cumulative price change since the earliest data point (Jan&nbsp;2023).</span></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="kpi-card">
-                    <div class="value" id="kpi-yoy">&mdash;</div>
-                    <div class="label" id="kpi-yoy-label">YoY Inflation</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="value" id="kpi-total" style="color: #E53935">&mdash;</div>
-                    <div class="label" id="kpi-total-label">Total Change</div>
-                </div>
-            </div>
-            <div class="chart-card">
-                <div id="chart-cpi"></div>
-            </div>
-            <div class="chart-card">
-                <div id="chart-mom"></div>
+                <div class="chart-card"><div id="chart-cpi"></div></div>
+                <div class="chart-card"><div id="chart-mom"></div></div>
             </div>
         </div>
     </div>
 
     <!-- ==================== TAB 2: WAGES ==================== -->
-    <div id="tab-wages" class="tab-content">
+    <div id="tab-wages" class="tab-content loading">
         <div class="container">
-            <div class="filters">
-                <div class="filter-group">
-                    <label for="wage-cat-select">Category:</label>
-                    <select id="wage-cat-select"></select>
+            <!-- Skeleton -->
+            <div class="skeleton">
+                <div style="display:flex;gap:0.8rem;justify-content:center;margin-bottom:1.2rem">
+                    <div class="skeleton-bar" style="width:140px;height:38px"></div>
+                    <div class="skeleton-bar" style="width:200px;height:38px"></div>
                 </div>
-                <div class="filter-group">
-                    <label for="wage-area-select">Control Area:</label>
-                    <select id="wage-area-select"></select>
+                <div class="kpi-row">
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
                 </div>
+                <div class="skeleton-bar skeleton-chart"></div>
+                <div class="skeleton-bar skeleton-chart"></div>
             </div>
-            <div class="kpi-row">
-                <div class="kpi-card">
-                    <div class="value" id="kpi-wage-latest">&mdash;</div>
-                    <div class="label" id="kpi-wage-latest-label">Latest Wage</div>
+
+            <!-- Live content -->
+            <div class="live-content">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="wage-cat-select">Category:</label>
+                        <select id="wage-cat-select"></select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="wage-area-select">Control Area:</label>
+                        <select id="wage-area-select"></select>
+                    </div>
                 </div>
-                <div class="kpi-card">
-                    <div class="value" id="kpi-wage-mom">&mdash;</div>
-                    <div class="label">Last Monthly Change</div>
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-wage-latest">&mdash;</div>
+                        <div class="label">
+                            <span id="kpi-wage-latest-label">Latest Wage</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Average monthly wage in Syrian Pounds (SYP) for the selected category and control area.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-wage-mom">&mdash;</div>
+                        <div class="label">
+                            <span>Last Monthly Change</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Month-over-month percentage change in average wages. Green&nbsp;=&nbsp;increase, Red&nbsp;=&nbsp;decrease.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-wage-min">&mdash;</div>
+                        <div class="label">
+                            <span id="kpi-wage-min-label">Minimum</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Lowest recorded wage in the available time series for this selection.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-wage-max">&mdash;</div>
+                        <div class="label">
+                            <span id="kpi-wage-max-label">Maximum</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Highest recorded wage in the available time series for this selection.</span></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="kpi-card">
-                    <div class="value" id="kpi-wage-min">&mdash;</div>
-                    <div class="label" id="kpi-wage-min-label">Minimum</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="value" id="kpi-wage-max">&mdash;</div>
-                    <div class="label" id="kpi-wage-max-label">Maximum</div>
-                </div>
-            </div>
-            <div class="chart-card">
-                <div id="chart-wage-trend"></div>
-            </div>
-            <div class="chart-card">
-                <div id="chart-wage-compare"></div>
+                <div class="chart-card"><div id="chart-wage-trend"></div></div>
+                <div class="chart-card"><div id="chart-wage-compare"></div></div>
             </div>
         </div>
     </div>
 
+    <!-- ==================== TAB 3: WORLD BANK DATA (macrotab) ==================== -->
+    <div id="tab-wb" class="tab-content">
+        <div class="sub-tab-bar">
+            <button class="sub-tab-btn active" data-sub="sub-economy">Economy</button>
+            <button class="sub-tab-btn" data-sub="sub-popconflict">Population &amp; Conflict</button>
+        </div>
+
+        <!-- SUB-TAB: ECONOMY -->
+        <div id="sub-economy" class="sub-content active">
+        <div id="tab-economy" class="loading">
+        <div class="container">
+            <div class="skeleton">
+                <div class="kpi-row">
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                </div>
+                <div class="skeleton-bar skeleton-chart"></div>
+                <div class="skeleton-bar skeleton-chart"></div>
+            </div>
+            <div class="live-content">
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-gdp">&mdash;</div>
+                        <div class="label"><span id="kpi-gdp-label">GDP</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Gross Domestic Product. Use the toggle above the chart to switch between constant 2015 US$, PPP (2021 international $), or nominal values. Source: World Bank.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-gdp-growth">&mdash;</div>
+                        <div class="label"><span id="kpi-gdp-growth-label">GDP Growth</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Annual percentage growth rate of real GDP. Source: World Bank.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-gni-pc">&mdash;</div>
+                        <div class="label"><span id="kpi-gni-pc-label">GNI per Capita</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Gross National Income per capita (Atlas method, current US$).</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-debt">&mdash;</div>
+                        <div class="label"><span id="kpi-debt-label">External Debt</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Total external debt stocks in current US dollars.</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+                        <button class="gdp-toggle active" data-gdp="real">Constant 2015 US$</button>
+                        <button class="gdp-toggle" data-gdp="ppp">PPP (Constant 2021 Int'l $)</button>
+                        <button class="gdp-toggle" data-gdp="nominal">Nominal (Current US$)</button>
+                    </div>
+                    <div id="chart-gdp"></div>
+                </div>
+                <div class="chart-card"><div id="chart-trade"></div></div>
+                <div class="chart-card"><div id="chart-inflation-deflator"></div></div>
+            </div>
+        </div>
+    </div> <!-- /tab-economy loading wrapper -->
+    </div> <!-- /sub-economy -->
+
+        <!-- SUB-TAB: POPULATION & CONFLICT -->
+        <div id="sub-popconflict" class="sub-content">
+        <div id="tab-popconflict" class="loading">
+        <div class="container">
+            <div class="skeleton">
+                <div class="kpi-row">
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                </div>
+                <div class="skeleton-bar skeleton-chart"></div>
+                <div class="skeleton-bar skeleton-chart"></div>
+            </div>
+            <div class="live-content">
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-pop">&mdash;</div>
+                        <div class="label"><span id="kpi-pop-label">Population</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Total population estimate. Source: World Bank / UN Population Division.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-netmig">&mdash;</div>
+                        <div class="label"><span id="kpi-netmig-label">Net Migration</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Net number of migrants (immigrants minus emigrants). Positive = more people entering.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-life">&mdash;</div>
+                        <div class="label"><span id="kpi-life-label">Life Expectancy</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Life expectancy at birth, total (years).</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-battle">&mdash;</div>
+                        <div class="label"><span id="kpi-battle-label">Battle Deaths</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Battle-related deaths (number of people). Source: Uppsala Conflict Data / World Bank.</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card"><div id="chart-population"></div></div>
+                <div class="chart-card"><div id="chart-conflict"></div></div>
+                <div class="chart-card"><div id="chart-health"></div></div>
+            </div>
+        </div>
+    </div> <!-- /tab-popconflict loading wrapper -->
+    </div> <!-- /sub-popconflict -->
+    </div> <!-- /tab-wb -->
+
+    <!-- ==================== TAB 4: UNHCR REFUGEES ==================== -->
+    <div id="tab-refugees" class="tab-content">
+    <div id="refugees-loader" class="loading">
+        <div class="container">
+            <div class="skeleton">
+                <div class="kpi-row">
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                    <div class="skeleton-bar skeleton-kpi"></div>
+                </div>
+                <div class="skeleton-bar skeleton-chart"></div>
+                <div class="skeleton-bar skeleton-chart"></div>
+                <div class="skeleton-bar skeleton-chart"></div>
+            </div>
+            <div class="live-content">
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-ref-total">&mdash;</div>
+                        <div class="label"><span id="kpi-ref-total-label">Registered Refugees</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Total registered Syrian refugees across all host countries. Source: UNHCR Operational Data Portal.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-ref-top" style="font-size:1.5rem">&mdash;</div>
+                        <div class="label"><span id="kpi-ref-top-label">Top Host Country</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Country hosting the largest number of registered Syrian refugees.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-ref-resettle">&mdash;</div>
+                        <div class="label"><span id="kpi-ref-resettle-label">Resettlement</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Resettlement is the transfer of refugees from the host country where they sought asylum to a third country that has agreed to admit them with permanent residence status. It is one of three durable solutions (alongside voluntary repatriation and local integration). Numbers reflect UNHCR submissions to resettlement countries.</span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="value" id="kpi-ref-returns">&mdash;</div>
+                        <div class="label"><span id="kpi-ref-returns-label">Self-Organized Returns</span>
+                            <span class="info-icon" tabindex="0">i<span class="info-tip">Number of Syrian refugees who self-organized their return to Syria in the latest available year.</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card"><div id="chart-ref-bycountry"></div></div>
+                <div class="chart-card"><div id="chart-ref-timeseries"></div></div>
+                <div class="chart-card"><div id="chart-ref-demography"></div></div>
+            </div>
+        </div>
+    </div>
+    </div> <!-- /tab-refugees -->
+
     <div class="footer">
-        Data source: <a href="https://scpr-syria.org/publications/bulletins/" target="_blank">Syrian Center for Policy Research (SCPR)</a>
-        &middot; Base year: 2021 = 100
+        Data sources: <a href="https://scpr-syria.org/publications/bulletins/" target="_blank">SCPR</a> (CPI &amp; Wages &mdash; base year 2021&nbsp;=&nbsp;100)
+        &middot; <a href="https://data.worldbank.org/country/syrian-arab-republic" target="_blank">World Bank Open Data</a> (Economy &amp; Population)
+        &middot; <a href="https://data.unhcr.org/en/situations/syria" target="_blank">UNHCR</a> (Refugees)
     </div>
 
     <script>
-    /* --- Helpers --- */
+    /* ========== Theme Toggle ========== */
+    function updateThemeIcon() {
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        document.getElementById("theme-icon").innerHTML = isDark ? "&#9788;" : "&#9790;";
+    }
+    updateThemeIcon();
+
+    document.getElementById("theme-toggle").addEventListener("click", function () {
+        var cur = document.documentElement.getAttribute("data-theme");
+        var next = cur === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("syria-dash-theme", next);
+        updateThemeIcon();
+        var active = document.querySelector(".tab-btn.active");
+        if (active) reRenderActiveTab(active.dataset.tab);
+    });
+
+    function reRenderActiveTab(tab) {
+        if (tab === "tab-cpi" && _data) renderCPI();
+        else if (tab === "tab-wages" && _data) renderWages();
+        else if (tab === "tab-wb") {
+            var activeSub = document.querySelector(".sub-tab-btn.active");
+            var s = activeSub ? activeSub.dataset.sub : "sub-economy";
+            if (s === "sub-economy" && _wbEconReady) renderEconomy();
+            else if (s === "sub-popconflict" && _wbPopReady) renderPopConflict();
+        }
+        else if (tab === "tab-refugees" && _unhcrReady) renderRefugees();
+    }
+
+    /* ========== Helpers ========== */
     function fmtDate(d) {
         return new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", year: "numeric" });
     }
@@ -235,6 +720,35 @@
         return "SYP " + v.toLocaleString("en-US");
     }
 
+    /** Apply dark/light theme colours to a Plotly layout object */
+    function applyTheme(layout) {
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        var bg = isDark ? "#1a1d28" : "#ffffff";
+        var grid = isDark ? "#333" : "#eee";
+        var txt = isDark ? "#e0e0e0" : "#1a1a2e";
+        layout.paper_bgcolor = bg;
+        layout.plot_bgcolor = bg;
+        layout.font = { color: txt };
+        if (layout.xaxis) layout.xaxis.gridcolor = grid;
+        if (layout.yaxis) layout.yaxis.gridcolor = grid;
+        return layout;
+    }
+
+    /** Plotly config shared by all charts */
+    var PLOTLY_CFG = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ["lasso2d", "select2d"] };
+
+    /** Range-selector buttons for time-series x-axes */
+    var RANGE_SELECTOR = {
+        buttons: [
+            { count: 6, label: "6M", step: "month", stepmode: "backward" },
+            { count: 1, label: "1Y", step: "year", stepmode: "backward" },
+            { step: "all", label: "All" }
+        ],
+        activecolor: "#42a5f5",
+        bgcolor: "rgba(66,165,245,0.08)",
+        font: { size: 12 }
+    };
+
     var _data = null;
 
     /* ========== Tab switching ========== */
@@ -244,9 +758,31 @@
             document.querySelectorAll(".tab-content").forEach(function (c) { c.classList.remove("active"); });
             btn.classList.add("active");
             document.getElementById(btn.dataset.tab).classList.add("active");
-            /* Re-render active tab so Plotly resizes properly */
-            if (btn.dataset.tab === "tab-cpi") renderCPI();
-            else renderWages();
+            var t = btn.dataset.tab;
+            /* Freshness badge is SCPR-only (CPI & Wages) */
+            var fb = document.getElementById("freshness-badge");
+            if (fb) fb.style.display = (t === "tab-cpi" || t === "tab-wages") ? "inline-block" : "none";
+            if (t === "tab-cpi") renderCPI();
+            else if (t === "tab-wages") renderWages();
+            else if (t === "tab-wb") {
+                var activeSub = document.querySelector(".sub-tab-btn.active");
+                var s = activeSub ? activeSub.dataset.sub : "sub-economy";
+                if (s === "sub-economy") initEconomy();
+                else if (s === "sub-popconflict") initPopConflict();
+            }
+            else if (t === "tab-refugees") initRefugees();
+        });
+    });
+
+    /* Sub-tab switching inside World Bank macrotab */
+    document.querySelectorAll(".sub-tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            document.querySelectorAll(".sub-tab-btn").forEach(function (b) { b.classList.remove("active"); });
+            document.querySelectorAll(".sub-content").forEach(function (c) { c.classList.remove("active"); });
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.sub).classList.add("active");
+            if (btn.dataset.sub === "sub-economy") initEconomy();
+            else if (btn.dataset.sub === "sub-popconflict") initPopConflict();
         });
     });
 
@@ -257,6 +793,7 @@
         var commodity = document.getElementById("commodity-select").value;
         var records   = _data.records;
         var dates     = records.map(function (r) { return r.date; });
+        var isDark    = document.documentElement.getAttribute("data-theme") === "dark";
 
         var cpis = records.map(function (r) {
             var c = r[commodity];
@@ -323,14 +860,15 @@
             marker: { size: 6, color: "#1565C0" },
             text: dates.map(fmtDateLong),
             hovertemplate: "<b>%{text}</b><br>CPI: %{y}<extra></extra>",
-            fill: "tozeroy", fillcolor: "rgba(33,150,243,0.07)"
-        }], {
+            fill: "tozeroy", fillcolor: isDark ? "rgba(33,150,243,0.12)" : "rgba(33,150,243,0.07)"
+        }], applyTheme({
             title: { text: "Consumer Price Index \u2014 " + subtitle, font: { size: 18 } },
-            yaxis: { title: "CPI (2021 = 100)" }, xaxis: { title: "", hoverformat: "%b %Y" },
-            template: "plotly_white", height: 420,
+            yaxis: { title: "CPI (2021 = 100)" },
+            xaxis: { title: "", hoverformat: "%b %Y", rangeselector: RANGE_SELECTOR },
+            height: 440,
             margin: { l: 60, r: 30, t: 60, b: 40 },
             hovermode: "x unified"
-        }, { responsive: true });
+        }), PLOTLY_CFG);
 
         Plotly.newPlot("chart-mom", [{
             x: momDates, y: momValues, type: "bar",
@@ -338,14 +876,16 @@
             text: momDates.map(fmtDateLong), textposition: "none",
             hovertemplate: "<b>%{text}</b><br>Change: %{y:+.2f}%<extra></extra>",
             name: "MoM Change"
-        }], {
+        }], applyTheme({
             title: { text: "Month-over-Month Change \u2014 " + subtitle, font: { size: 18 } },
-            yaxis: { title: "Monthly Change (%)" }, xaxis: { title: "", hoverformat: "%b %Y" },
-            template: "plotly_white", height: 400,
+            yaxis: { title: "Monthly Change (%)" },
+            xaxis: { title: "", hoverformat: "%b %Y", rangeselector: RANGE_SELECTOR },
+            height: 400,
             margin: { l: 60, r: 30, t: 60, b: 40 },
             hovermode: "x unified",
-            shapes: [{ type: "line", x0: 0, x1: 1, xref: "paper", y0: 0, y1: 0, line: { color: "black", width: 1 } }]
-        }, { responsive: true });
+            shapes: [{ type: "line", x0: 0, x1: 1, xref: "paper", y0: 0, y1: 0,
+                        line: { color: isDark ? "#555" : "black", width: 1 } }]
+        }), PLOTLY_CFG);
     }
 
     /* ========== WAGES TAB ========== */
@@ -358,12 +898,12 @@
 
     function renderWages() {
         if (!_data || !_data.wage_records) return;
-        var cat  = document.getElementById("wage-cat-select").value;
-        var area = document.getElementById("wage-area-select").value;
+        var cat   = document.getElementById("wage-cat-select").value;
+        var area  = document.getElementById("wage-area-select").value;
         var wRecs = _data.wage_records;
         var dates = wRecs.map(function (r) { return r.date; });
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
 
-        /* Extract wage series for selected category + area */
         var wages = wRecs.map(function (r) {
             var c = r[cat];
             return c ? (c[area] != null ? c[area] : null) : null;
@@ -404,7 +944,7 @@
         document.getElementById("kpi-wage-max").style.color = "#43A047";
         document.getElementById("kpi-wage-max-label").textContent = "Maximum (" + fmtDate(maxRec.date) + ")";
 
-        /* Chart 1: Wage trend for selected category + area */
+        /* Chart 1: Wage trend */
         var areaColor = AREA_COLORS[area] || "#1565C0";
         Plotly.newPlot("chart-wage-trend", [{
             x: dates, y: wages,
@@ -412,19 +952,19 @@
             line: { color: areaColor, width: 2.5 },
             marker: { size: 6 },
             text: dates.map(fmtDateLong),
-            hovertemplate: "<b>%{text}</b><br>" + fmtSYP(0).split(" ")[0] + " %{y:,.0f}<extra></extra>",
-            fill: "tozeroy", fillcolor: "rgba(33,150,243,0.07)",
+            hovertemplate: "<b>%{text}</b><br>SYP %{y:,.0f}<extra></extra>",
+            fill: "tozeroy", fillcolor: isDark ? "rgba(33,150,243,0.12)" : "rgba(33,150,243,0.07)",
             connectgaps: true
-        }], {
+        }], applyTheme({
             title: { text: "Average Monthly Wage \u2014 " + cat + " (" + area + ")", font: { size: 18 } },
             yaxis: { title: "Monthly Wage (SYP)", tickformat: ",d" },
-            xaxis: { title: "", hoverformat: "%b %Y" },
-            template: "plotly_white", height: 420,
+            xaxis: { title: "", hoverformat: "%b %Y", rangeselector: RANGE_SELECTOR },
+            height: 420,
             margin: { l: 80, r: 30, t: 60, b: 40 },
             hovermode: "x unified"
-        }, { responsive: true });
+        }), PLOTLY_CFG);
 
-        /* Chart 2: Compare all areas for the selected category */
+        /* Chart 2: Compare all areas */
         var traces = [];
         _data.control_areas.forEach(function (a) {
             var aW = wRecs.map(function (r) {
@@ -441,18 +981,576 @@
                 connectgaps: true
             });
         });
-        Plotly.newPlot("chart-wage-compare", traces, {
+        Plotly.newPlot("chart-wage-compare", traces, applyTheme({
             title: { text: "Wage Comparison Across Control Areas \u2014 " + cat, font: { size: 18 } },
             yaxis: { title: "Monthly Wage (SYP)", tickformat: ",d" },
-            xaxis: { title: "", hoverformat: "%b %Y" },
-            template: "plotly_white", height: 420,
+            xaxis: { title: "", hoverformat: "%b %Y", rangeselector: RANGE_SELECTOR },
+            height: 420,
             margin: { l: 80, r: 30, t: 60, b: 40 },
             hovermode: "x unified",
             legend: { orientation: "h", y: -0.15 }
-        }, { responsive: true });
+        }), PLOTLY_CFG);
     }
 
-    /* --- Load data and initialise --- */
+    /* ========== Data Freshness ========== */
+    function updateFreshness(data) {
+        var recs = data.records;
+        if (!recs || recs.length === 0) return;
+        var lastDate = recs[recs.length - 1].date;
+        var d = new Date(lastDate + "T00:00:00");
+        var now = new Date();
+        var diffDays = Math.floor((now - d) / 86400000);
+        var txt = "Data through " + fmtDate(lastDate);
+        if (diffDays <= 45) {
+            txt += " \u00b7 Up to date";
+        } else {
+            txt += " \u00b7 " + diffDays + " days ago";
+            var dot = document.getElementById("freshness-dot");
+            if (dot) dot.style.background = diffDays > 90 ? "#E53935" : "#FF9800";
+        }
+        document.getElementById("freshness-text").textContent = txt;
+        document.getElementById("freshness-badge").style.display = "inline-block";
+    }
+
+    /* ========================================================
+       WORLD BANK API — Economy & Population tabs
+       ======================================================== */
+    var WB_API = "https://api.worldbank.org/v2/country/SYR/indicator/";
+    var WB_PARAMS = "?format=json&date=2010:2026&per_page=100";
+    var _wbCache = {};  /* indicator code → [{year, value}] */
+    var _wbEconReady = false;
+    var _wbPopReady = false;
+
+    /** Fetch a single WB indicator. Returns promise of [{year,value}] sorted by year. */
+    function fetchWB(code) {
+        if (_wbCache[code]) return Promise.resolve(_wbCache[code]);
+        return fetch(WB_API + code + WB_PARAMS)
+            .then(function (r) { return r.json(); })
+            .then(function (json) {
+                if (!json || json.length < 2 || !json[1]) return [];
+                var pts = json[1]
+                    .filter(function (d) { return d.value !== null; })
+                    .map(function (d) { return { year: parseInt(d.date), value: d.value }; })
+                    .sort(function (a, b) { return a.year - b.year; });
+                _wbCache[code] = pts;
+                return pts;
+            })
+            .catch(function () { return []; });
+    }
+
+    /** Fetch multiple indicators in parallel */
+    function fetchWBMulti(codes) {
+        return Promise.all(codes.map(fetchWB));
+    }
+
+    function wbLatest(pts) { return pts.length ? pts[pts.length - 1] : null; }
+    function fmtB(v) { return "$" + (v / 1e9).toFixed(1) + "B"; }
+    function fmtM(v) { return (v / 1e6).toFixed(1) + "M"; }
+    function fmtK(v) {
+        if (Math.abs(v) >= 1e6) return fmtM(v);
+        if (Math.abs(v) >= 1e3) return (v / 1e3).toFixed(0) + "K";
+        return v.toLocaleString("en-US");
+    }
+
+    /* ---------- ECONOMY TAB ---------- */
+    var ECON_CODES = [
+        "NY.GDP.MKTP.KD",       /* GDP constant 2015 US$ */
+        "NY.GDP.MKTP.PP.KD",    /* GDP, PPP constant 2021 int'l $ */
+        "NY.GDP.MKTP.CD",       /* GDP nominal current US$ */
+        "NY.GDP.MKTP.KD.ZG",    /* GDP growth (annual %) */
+        "NY.GNP.PCAP.CD",       /* GNI per capita Atlas */
+        "DT.DOD.DECT.CD",       /* External debt */
+        "NE.EXP.GNFS.ZS",       /* Exports % GDP */
+        "NE.IMP.GNFS.ZS",       /* Imports % GDP */
+        "NY.GDP.DEFL.KD.ZG"     /* Inflation GDP deflator */
+    ];
+
+    var _gdpMode = "real"; /* "real", "ppp", or "nominal" */
+
+    function initEconomy() {
+        if (_wbEconReady) { renderEconomy(); return; }
+        fetchWBMulti(ECON_CODES).then(function () {
+            _wbEconReady = true;
+            document.getElementById("tab-economy").classList.remove("loading");
+            renderEconomy();
+        });
+    }
+
+    function renderEconomy() {
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        var gni = _wbCache["NY.GNP.PCAP.CD"] || [];
+        var debt = _wbCache["DT.DOD.DECT.CD"] || [];
+        var exp = _wbCache["NE.EXP.GNFS.ZS"] || [];
+        var imp = _wbCache["NE.IMP.GNFS.ZS"] || [];
+        var defl = _wbCache["NY.GDP.DEFL.KD.ZG"] || [];
+
+        /* KPIs — use selected GDP mode */
+        var gdpCode = _gdpMode === "ppp" ? "NY.GDP.MKTP.PP.KD" : (_gdpMode === "nominal" ? "NY.GDP.MKTP.CD" : "NY.GDP.MKTP.KD");
+        var gdpSrc = _wbCache[gdpCode] || [];
+        var gdpGr = _wbCache["NY.GDP.MKTP.KD.ZG"] || [];
+        var gdpLabel = _gdpMode === "ppp" ? "GDP PPP" : (_gdpMode === "nominal" ? "GDP Nominal" : "Real GDP");
+        var lg = wbLatest(gdpSrc);
+        if (lg) { document.getElementById("kpi-gdp").textContent = fmtB(lg.value); document.getElementById("kpi-gdp-label").textContent = gdpLabel + " (" + lg.year + ")"; }
+        var lgg = wbLatest(gdpGr);
+        if (lgg) { var v = lgg.value; document.getElementById("kpi-gdp-growth").textContent = (v > 0 ? "+" : "") + v.toFixed(2) + "%"; document.getElementById("kpi-gdp-growth").style.color = v > 0 ? "#43A047" : "#E53935"; document.getElementById("kpi-gdp-growth-label").textContent = "Real GDP Growth (" + lgg.year + ")"; }
+        var lgni = wbLatest(gni);
+        if (lgni) { document.getElementById("kpi-gni-pc").textContent = "$" + lgni.value.toFixed(0); document.getElementById("kpi-gni-pc-label").textContent = "GNI per Capita (" + lgni.year + ")"; }
+        var ld = wbLatest(debt);
+        if (ld) { document.getElementById("kpi-debt").textContent = fmtB(ld.value); document.getElementById("kpi-debt-label").textContent = "External Debt (" + ld.year + ")"; }
+
+        /* Chart 1: GDP with bar + growth line */
+        renderGDPChart(isDark);
+
+        /* Chart 2: Trade — Exports & Imports as % GDP */
+        var expYears = exp.map(function(p){return p.year.toString();});
+        var expVals = exp.map(function(p){return p.value;});
+        var impYears = imp.map(function(p){return p.year.toString();});
+        var impVals = imp.map(function(p){return p.value;});
+
+        Plotly.newPlot("chart-trade", [
+            { x: expYears, y: expVals, mode: "lines+markers", name: "Exports (% GDP)", line: { color: "#43A047", width: 2.5 }, marker: { size: 6 }, fill: "tozeroy", fillcolor: isDark ? "rgba(67,160,71,0.1)" : "rgba(67,160,71,0.06)", hovertemplate: "%{x}<br>Exports: %{y:.2f}%<extra></extra>" },
+            { x: impYears, y: impVals, mode: "lines+markers", name: "Imports (% GDP)", line: { color: "#E53935", width: 2.5 }, marker: { size: 6 }, fill: "tozeroy", fillcolor: isDark ? "rgba(229,57,53,0.08)" : "rgba(229,57,53,0.04)", hovertemplate: "%{x}<br>Imports: %{y:.2f}%<extra></extra>" }
+        ], applyTheme({
+            title: { text: "Trade as % of GDP \u2014 Exports vs Imports", font: { size: 18 } },
+            yaxis: { title: "% of GDP" },
+            xaxis: { title: "" },
+            height: 400, margin: { l: 60, r: 30, t: 60, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: -0.12 }
+        }), PLOTLY_CFG);
+
+        /* Chart 3: Inflation deflator */
+        var defYears = defl.map(function(p){return p.year.toString();});
+        var defVals = defl.map(function(p){return p.value;});
+        var defColors = defl.map(function(p){return p.value > 0 ? "#E53935" : "#43A047";});
+
+        Plotly.newPlot("chart-inflation-deflator", [{
+            x: defYears, y: defVals, type: "bar",
+            marker: { color: defColors }, name: "Inflation",
+            hovertemplate: "%{x}<br>Deflator: %{y:.2f}%<extra></extra>"
+        }], applyTheme({
+            title: { text: "GDP Deflator (Annual %)", font: { size: 18 } },
+            yaxis: { title: "Annual %" },
+            xaxis: { title: "" },
+            height: 440, margin: { l: 60, r: 30, t: 80, b: 40 },
+            hovermode: "x unified",
+            shapes: [{ type: "line", x0: 0, x1: 1, xref: "paper", y0: 0, y1: 0, line: { color: isDark ? "#555" : "black", width: 1 } }],
+            annotations: [{
+                text: "The GDP deflator measures the ratio of nominal to real GDP.<br>Unlike CPI (which tracks consumer prices), it covers all goods &amp; services produced domestically.",
+                xref: "paper", yref: "paper", x: 0.5, y: 1.01, xanchor: "center", yanchor: "bottom",
+                showarrow: false, font: { size: 12, color: isDark ? "#aaa" : "#666" }
+            }]
+        }), PLOTLY_CFG);
+    }
+
+    /** Render GDP chart based on current _gdpMode */
+    function renderGDPChart(isDark) {
+        if (typeof isDark === "undefined") isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        var gdpCode = _gdpMode === "ppp" ? "NY.GDP.MKTP.PP.KD" : (_gdpMode === "nominal" ? "NY.GDP.MKTP.CD" : "NY.GDP.MKTP.KD");
+        var gdpData = _wbCache[gdpCode] || [];
+        var gdpGr = _wbCache["NY.GDP.MKTP.KD.ZG"] || [];
+
+        var gdpYears = gdpData.map(function(p){return p.year.toString();});
+        var gdpVals = gdpData.map(function(p){return p.value / 1e9;});
+        var grYears = gdpGr.map(function(p){return p.year.toString();});
+        var grVals = gdpGr.map(function(p){return Math.round(p.value * 100) / 100;});
+
+        var LABELS = {
+            real:    { bar: "Real GDP ($B)",    hover: "%{x}<br>Real GDP: $%{y:.2f}B<extra></extra>",    title: "GDP (Constant 2015 US$) & Annual Growth Rate",           y: "Real GDP (Billion 2015 US$)" },
+            ppp:     { bar: "GDP PPP ($B)",     hover: "%{x}<br>GDP PPP: $%{y:.2f}B<extra></extra>",     title: "GDP, PPP (Constant 2021 Int'l $) & Annual Growth Rate", y: "GDP PPP (Billion 2021 Int'l $)" },
+            nominal: { bar: "GDP Nominal ($B)", hover: "%{x}<br>GDP Nominal: $%{y:.2f}B<extra></extra>", title: "GDP (Current US$) & Annual Growth Rate",                 y: "GDP Nominal (Billion US$)" }
+        };
+        var L = LABELS[_gdpMode];
+
+        Plotly.newPlot("chart-gdp", [
+            { x: gdpYears, y: gdpVals, type: "bar", name: L.bar, marker: { color: "#42a5f5" }, yaxis: "y", hovertemplate: L.hover },
+            { x: grYears, y: grVals, mode: "lines+markers", name: "Real Growth (%)", line: { color: "#FF9800", width: 2.5 }, marker: { size: 7 }, yaxis: "y2", hovertemplate: "%{x}<br>Growth: %{y:+.2f}%<extra></extra>" }
+        ], applyTheme({
+            title: { text: L.title, font: { size: 18 } },
+            yaxis: { title: L.y, side: "left", hoverformat: ".2f" },
+            yaxis2: { title: "Real Growth (%)", overlaying: "y", side: "right", zeroline: true, zerolinecolor: isDark ? "#555" : "#ccc", hoverformat: "+.2f" },
+            xaxis: { title: "" },
+            height: 440, margin: { l: 70, r: 70, t: 60, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: -0.12 },
+            bargap: 0.35
+        }), PLOTLY_CFG);
+    }
+
+    /* GDP toggle buttons */
+    document.querySelectorAll(".gdp-toggle").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            document.querySelectorAll(".gdp-toggle").forEach(function(b){ b.classList.remove("active"); });
+            btn.classList.add("active");
+            _gdpMode = btn.dataset.gdp;
+            if (_wbEconReady) renderEconomy();
+        });
+    });
+
+    /* ---------- POPULATION & CONFLICT TAB ---------- */
+    var POP_CODES = [
+        "SP.POP.TOTL",          /* Population total */
+        "SP.POP.GROW",          /* Pop growth % */
+        "SM.POP.NETM",          /* Net migration */
+        "SP.DYN.LE00.IN",       /* Life expectancy */
+        "VC.BTL.DETH",          /* Battle deaths */
+        "SH.DYN.MORT",          /* Under-5 mortality */
+        "SH.IMM.MEAS",          /* Immunization measles */
+        "DT.ODA.ALLD.CD"        /* ODA received */
+    ];
+
+    function initPopConflict() {
+        if (_wbPopReady) { renderPopConflict(); return; }
+        fetchWBMulti(POP_CODES).then(function () {
+            _wbPopReady = true;
+            document.getElementById("tab-popconflict").classList.remove("loading");
+            renderPopConflict();
+        });
+    }
+
+    function renderPopConflict() {
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        var pop = _wbCache["SP.POP.TOTL"] || [];
+        var popGr = _wbCache["SP.POP.GROW"] || [];
+        var netMig = _wbCache["SM.POP.NETM"] || [];
+        var lifeExp = _wbCache["SP.DYN.LE00.IN"] || [];
+        var battle = _wbCache["VC.BTL.DETH"] || [];
+        var u5mort = _wbCache["SH.DYN.MORT"] || [];
+        var immun = _wbCache["SH.IMM.MEAS"] || [];
+        var oda = _wbCache["DT.ODA.ALLD.CD"] || [];
+
+        /* KPIs */
+        var lp = wbLatest(pop);
+        if (lp) { document.getElementById("kpi-pop").textContent = fmtM(lp.value); document.getElementById("kpi-pop-label").textContent = "Population (" + lp.year + ")"; }
+        var lm = wbLatest(netMig);
+        if (lm) { var mv = lm.value; document.getElementById("kpi-netmig").textContent = (mv > 0 ? "+" : "") + fmtK(mv); document.getElementById("kpi-netmig").style.color = mv > 0 ? "#43A047" : "#E53935"; document.getElementById("kpi-netmig-label").textContent = "Net Migration (" + lm.year + ")"; }
+        var ll = wbLatest(lifeExp);
+        if (ll) { document.getElementById("kpi-life").textContent = ll.value.toFixed(2) + " yrs"; document.getElementById("kpi-life-label").textContent = "Life Expectancy (" + ll.year + ")"; }
+        var lb = wbLatest(battle);
+        if (lb) { document.getElementById("kpi-battle").textContent = lb.value.toLocaleString("en-US"); document.getElementById("kpi-battle").style.color = "#E53935"; document.getElementById("kpi-battle-label").textContent = "Battle Deaths (" + lb.year + ")"; }
+
+        /* Chart 1: Population bar + growth line */
+        var popYears = pop.map(function(p){return p.year.toString();});
+        var popVals = pop.map(function(p){return p.value / 1e6;});
+        var pgYears = popGr.map(function(p){return p.year.toString();});
+        var pgVals = popGr.map(function(p){return Math.round(p.value * 100) / 100;});
+
+        Plotly.newPlot("chart-population", [
+            { x: popYears, y: popVals, type: "bar", name: "Population (M)", marker: { color: "#42a5f5" }, yaxis: "y", hovertemplate: "%{x}<br>Pop: %{y:.2f}M<extra></extra>" },
+            { x: pgYears, y: pgVals, mode: "lines+markers", name: "Growth (%)", line: { color: "#FF9800", width: 2.5 }, marker: { size: 7 }, yaxis: "y2", hovertemplate: "%{x}<br>Growth: %{y:+.2f}%<extra></extra>" }
+        ], applyTheme({
+            title: { text: "Population & Annual Growth Rate", font: { size: 18 } },
+            yaxis: { title: "Population (Millions)", hoverformat: ".2f" },
+            yaxis2: { title: "Growth (%)", overlaying: "y", side: "right", zeroline: true, zerolinecolor: isDark ? "#555" : "#ccc", hoverformat: "+.2f" },
+            xaxis: { title: "" },
+            height: 440, margin: { l: 70, r: 70, t: 60, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: -0.12 },
+            bargap: 0.35
+        }), PLOTLY_CFG);
+
+        /* Chart 2: Conflict — battle deaths + net migration + ODA */
+        var batYears = battle.map(function(p){return p.year.toString();});
+        var batVals = battle.map(function(p){return p.value;});
+        var migYears = netMig.map(function(p){return p.year.toString();});
+        var migVals = netMig.map(function(p){return p.value;});
+        var odaYears = oda.map(function(p){return p.year.toString();});
+        var odaVals = oda.map(function(p){return p.value / 1e9;});
+
+        Plotly.newPlot("chart-conflict", [
+            { x: batYears, y: batVals, type: "bar", name: "Battle Deaths", marker: { color: "#E53935", opacity: 0.8 }, yaxis: "y", hovertemplate: "%{x}<br>Deaths: %{y:,.0f}<extra></extra>" },
+            { x: migYears, y: migVals, mode: "lines+markers", name: "Net Migration", line: { color: "#43A047", width: 2.5 }, marker: { size: 6 }, yaxis: "y", hovertemplate: "%{x}<br>Net Mig: %{y:+,.0f}<extra></extra>" },
+            { x: odaYears, y: odaVals, mode: "lines+markers", name: "ODA ($B)", line: { color: "#9C27B0", width: 2, dash: "dot" }, marker: { size: 6 }, yaxis: "y2", hovertemplate: "%{x}<br>ODA: $%{y:.2f}B<extra></extra>" }
+        ], applyTheme({
+            title: { text: "Conflict Indicators \u2014 Battle Deaths, Net Migration & ODA", font: { size: 18 } },
+            yaxis: { title: "People" },
+            yaxis2: { title: "ODA (Billion US$)", overlaying: "y", side: "right", hoverformat: ".2f" },
+            xaxis: { title: "" },
+            height: 460, margin: { l: 80, r: 80, t: 80, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: -0.12 },
+            annotations: [{
+                text: "ODA = Official Development Assistance \u2014 grants and concessional loans from donor governments to support development.",
+                xref: "paper", yref: "paper", x: 0.5, y: 1.01, xanchor: "center", yanchor: "bottom",
+                showarrow: false, font: { size: 12, color: isDark ? "#aaa" : "#666" }
+            }]
+        }), PLOTLY_CFG);
+
+        /* Chart 3: Health — Under-5 mortality + Immunization */
+        var u5Years = u5mort.map(function(p){return p.year.toString();});
+        var u5Vals = u5mort.map(function(p){return p.value;});
+        var immYears = immun.map(function(p){return p.year.toString();});
+        var immVals = immun.map(function(p){return p.value;});
+
+        Plotly.newPlot("chart-health", [
+            { x: u5Years, y: u5Vals, mode: "lines+markers", name: "Under-5 Mortality (per 1K)", line: { color: "#E53935", width: 2.5 }, marker: { size: 6 }, yaxis: "y", hovertemplate: "%{x}<br>U5 Mortality: %{y:.2f}<extra></extra>" },
+            { x: immYears, y: immVals, mode: "lines+markers", name: "Measles Immunization (%)", line: { color: "#43A047", width: 2.5 }, marker: { size: 6 }, yaxis: "y2", hovertemplate: "%{x}<br>Immunization: %{y:.0f}%<extra></extra>" }
+        ], applyTheme({
+            title: { text: "Health Indicators \u2014 Child Mortality & Immunization", font: { size: 18 } },
+            yaxis: { title: "Under-5 Mortality (per 1,000)", rangemode: "tozero" },
+            yaxis2: { title: "Immunization Coverage (%)", overlaying: "y", side: "right", range: [0, 100] },
+            xaxis: { title: "" },
+            height: 400, margin: { l: 60, r: 60, t: 60, b: 40 },
+            hovermode: "x unified",
+            legend: { orientation: "h", y: -0.12 }
+        }), PLOTLY_CFG);
+    }
+
+    /* ========================================================
+       UNHCR REFUGEE DATA — Tab 4
+       ======================================================== */
+    var UNHCR_BASE = "https://data.unhcr.org/population/";
+    var _unhcrReady = false;
+    var _unhcrData = {};  /* total, countries, resettlement, returns, demography */
+
+    function fetchUNHCR(endpoint, key) {
+        if (_unhcrData[key]) return Promise.resolve(_unhcrData[key]);
+        return fetch(UNHCR_BASE + endpoint)
+            .then(function (r) { return r.json(); })
+            .then(function (json) { _unhcrData[key] = json; return json; })
+            .catch(function () { return null; });
+    }
+
+    function initRefugees() {
+        if (_unhcrReady) { renderRefugees(); return; }
+        Promise.all([
+            fetchUNHCR("?widget_id=583862&sv_id=4&population_collection=22", "total"),
+            fetchUNHCR("get/sublocation?widget_id=583863&sv_id=4&population_collection=24&forcesublocation=0&fromDate=1900-01-01", "countries"),
+            fetchUNHCR("get/timeseries?widget_id=583879&sv_id=4&population_group=5112&frequency=year&fromDate=1900-01-01", "resettlement"),
+            fetchUNHCR("get/timeseries?widget_id=583881&sv_id=4&population_group=5110&frequency=year&fromDate=1900-01-01", "returns"),
+            fetchUNHCR("get/demography?widget_id=583866&sv_id=4&population_collection=24", "demography"),
+            fetchUNHCR("get/timeseries?widget_id=583862&sv_id=4&population_collection=22&frequency=year&fromDate=1900-01-01", "totalTS")
+        ]).then(function () {
+            _unhcrReady = true;
+            document.getElementById("refugees-loader").classList.remove("loading");
+            renderRefugees();
+        });
+    }
+
+    function renderRefugees() {
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        var total = _unhcrData.total;
+        var countries = _unhcrData.countries;
+        var resettlement = _unhcrData.resettlement;
+        var returns = _unhcrData.returns;
+        var demography = _unhcrData.demography;
+        var totalTS = _unhcrData.totalTS;
+
+        /* ---- KPIs ---- */
+        if (total && total.data && total.data.length > 0) {
+            var t = total.data[0];
+            var totalInd = parseInt(t.individuals) || 0;
+            document.getElementById("kpi-ref-total").textContent = (totalInd / 1e6).toFixed(2) + "M";
+            var dateStr = t.date || "";
+            if (dateStr) {
+                var parts = dateStr.split("-");
+                var yr = parts[0]; var mo = parseInt(parts[1]);
+                var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                document.getElementById("kpi-ref-total-label").textContent = "Registered Refugees (" + months[mo - 1] + " " + yr + ")";
+            }
+        }
+
+        if (countries && countries.data && countries.data.length > 0) {
+            var sorted = countries.data.slice().sort(function (a, b) { return parseInt(b.individuals) - parseInt(a.individuals); });
+            var top = sorted[0];
+            var topName = top.geomaster_name || top.name || "—";
+            var topVal = parseInt(top.individuals) || 0;
+            document.getElementById("kpi-ref-top").textContent = topName.replace("ü", "ü") + " (" + (topVal / 1e6).toFixed(2) + "M)";
+            document.getElementById("kpi-ref-top-label").textContent = "Top Host Country";
+        }
+
+        var _resTS = (resettlement && resettlement.data && resettlement.data.timeseries) ? resettlement.data.timeseries : [];
+        var _retTS = (returns && returns.data && returns.data.timeseries) ? returns.data.timeseries : [];
+
+        /** Extract year from a timeseries record (may have .year or .data_date) */
+        function _tsYear(r) {
+            if (r.year) return parseInt(r.year);
+            if (r.data_date) return parseInt(r.data_date.split("-")[0]);
+            return 0;
+        }
+        /** Human-readable label: "2024" or "2024 (through Nov)" if partial */
+        function _tsLabel(r) {
+            var yr = _tsYear(r);
+            if (r.data_date) {
+                var parts = r.data_date.split("-");
+                var mo = parseInt(parts[1]);
+                if (mo < 12) {
+                    var moNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                    return yr + " (through " + moNames[mo - 1] + ")";
+                }
+            }
+            return String(yr);
+        }
+
+        if (_resTS.length > 0) {
+            var resData = _resTS.slice().sort(function (a, b) { return _tsYear(a) - _tsYear(b); });
+            var lastRes = resData[resData.length - 1];
+            document.getElementById("kpi-ref-resettle").textContent = parseInt(lastRes.individuals).toLocaleString("en-US");
+            document.getElementById("kpi-ref-resettle").style.color = "#43A047";
+            document.getElementById("kpi-ref-resettle-label").textContent = "Resettlement (" + _tsLabel(lastRes) + ")";
+        }
+
+        if (_retTS.length > 0) {
+            var retData = _retTS.slice().sort(function (a, b) { return _tsYear(a) - _tsYear(b); });
+            var lastRet = retData[retData.length - 1];
+            document.getElementById("kpi-ref-returns").textContent = parseInt(lastRet.individuals).toLocaleString("en-US");
+            document.getElementById("kpi-ref-returns").style.color = "#FF9800";
+            document.getElementById("kpi-ref-returns-label").textContent = "Self-Organized Returns (" + _tsLabel(lastRet) + ")";
+        }
+
+        /* ---- Chart 1: Refugees by Host Country (horizontal bar) ---- */
+        if (countries && countries.data && countries.data.length > 0) {
+            var countryDate = countries.data[0].date || "";
+            var countryYear = countryDate ? countryDate.split("-")[0] : "";
+            var cSorted = countries.data.slice().sort(function (a, b) { return parseInt(a.individuals) - parseInt(b.individuals); });
+            var cNames = cSorted.map(function (c) { return c.geomaster_name || c.name || ""; });
+            var cVals = cSorted.map(function (c) { return parseInt(c.individuals) || 0; });
+            var cColors = cSorted.map(function (c, i) {
+                var palette = ["#42a5f5", "#66bb6a", "#ffa726", "#ef5350", "#ab47bc", "#26c6da", "#8d6e63", "#78909c"];
+                return palette[i % palette.length];
+            });
+
+            Plotly.newPlot("chart-ref-bycountry", [{
+                x: cVals, y: cNames,
+                type: "bar", orientation: "h",
+                marker: { color: cColors },
+                text: cVals.map(function (v) { return v >= 1e6 ? (v / 1e6).toFixed(2) + "M" : v >= 1e3 ? (v / 1e3).toFixed(0) + "K" : v.toString(); }),
+                textposition: "outside",
+                hovertemplate: "<b>%{y}</b><br>Refugees: %{x:,.0f}<extra></extra>",
+                cliponaxis: false
+            }], applyTheme({
+                title: { text: "Syrian Refugees by Host Country" + (countryYear ? " (" + countryYear + ")" : ""), font: { size: 18 } },
+                xaxis: { title: "Registered Refugees", tickformat: ",d" },
+                yaxis: { automargin: true },
+                height: 80 + cNames.length * 52,
+                margin: { l: 120, r: 80, t: 60, b: 50 },
+                hovermode: "closest"
+            }), PLOTLY_CFG);
+        }
+
+        /* ---- Chart 2: Demographics Pyramid ---- */
+        if (demography && demography.data && demography.data.length > 0) {
+            var d = demography.data[0];
+            var ageLabels = ["0-4", "5-11", "12-17", "18-59", "60+"];
+            var maleKeys = ["male_04", "male_511", "male_1217", "male_1859", "male_60"];
+            var femaleKeys = ["female_04", "female_511", "female_1217", "female_1859", "female_60"];
+            var maleVals = maleKeys.map(function (k) { return -(parseInt(d[k]) || 0); });
+            var femaleVals = femaleKeys.map(function (k) { return parseInt(d[k]) || 0; });
+
+            Plotly.newPlot("chart-ref-demography", [
+                {
+                    y: ageLabels, x: maleVals, type: "bar", orientation: "h",
+                    name: "Male", marker: { color: "#42a5f5" },
+                    hovertemplate: "<b>%{y}</b><br>Male: %{customdata:,.0f}<extra></extra>",
+                    customdata: maleVals.map(function (v) { return Math.abs(v); })
+                },
+                {
+                    y: ageLabels, x: femaleVals, type: "bar", orientation: "h",
+                    name: "Female", marker: { color: "#ef5350" },
+                    hovertemplate: "<b>%{y}</b><br>Female: %{x:,.0f}<extra></extra>"
+                }
+            ], applyTheme({
+                title: { text: "Refugee Demographics — Age & Gender Breakdown", font: { size: 18 } },
+                xaxis: {
+                    title: "Number of Refugees",
+                    tickvals: (function () {
+                        var maxVal = Math.max(Math.max.apply(null, femaleVals), Math.max.apply(null, maleVals.map(Math.abs)));
+                        var step = Math.ceil(maxVal / 4 / 100000) * 100000;
+                        var ticks = [];
+                        for (var i = -4; i <= 4; i++) ticks.push(i * step);
+                        return ticks;
+                    })(),
+                    ticktext: (function () {
+                        var maxVal = Math.max(Math.max.apply(null, femaleVals), Math.max.apply(null, maleVals.map(Math.abs)));
+                        var step = Math.ceil(maxVal / 4 / 100000) * 100000;
+                        var texts = [];
+                        for (var i = -4; i <= 4; i++) texts.push(Math.abs(i * step) >= 1e6 ? (Math.abs(i * step) / 1e6).toFixed(1) + "M" : (Math.abs(i * step) / 1e3).toFixed(0) + "K");
+                        return texts;
+                    })()
+                },
+                yaxis: { automargin: true },
+                barmode: "overlay",
+                height: 380,
+                margin: { l: 70, r: 30, t: 60, b: 50 },
+                hovermode: "closest",
+                legend: { orientation: "h", y: -0.15 },
+                bargap: 0.15
+            }), PLOTLY_CFG);
+        }
+
+        /* ---- Chart 3: Resettlement & Returns Timeseries ---- */
+        var resYears = [], resVals = [], retYears = [], retVals = [];
+        if (_resTS.length > 0) {
+            var rsd = _resTS.slice().sort(function (a, b) { return _tsYear(a) - _tsYear(b); });
+            resYears = rsd.map(function (r) { return String(_tsYear(r)); });
+            resVals = rsd.map(function (r) { return parseInt(r.individuals) || 0; });
+        }
+        if (_retTS.length > 0) {
+            var rtd = _retTS.slice().sort(function (a, b) { return _tsYear(a) - _tsYear(b); });
+            retYears = rtd.map(function (r) { return String(_tsYear(r)); });
+            retVals = rtd.map(function (r) { return parseInt(r.individuals) || 0; });
+        }
+
+        if (resYears.length > 0 || retYears.length > 0) {
+            var tsTraces = [];
+            if (resYears.length > 0) {
+                tsTraces.push({
+                    x: resYears, y: resVals, type: "bar",
+                    name: "Resettlement Submissions",
+                    marker: { color: "#43A047" },
+                    hovertemplate: "%{x}<br>Resettlement: %{y:,.0f}<extra></extra>"
+                });
+            }
+            if (retYears.length > 0) {
+                tsTraces.push({
+                    x: retYears, y: retVals, type: "bar",
+                    name: "Self-Organized Returns",
+                    marker: { color: "#FF9800" },
+                    hovertemplate: "%{x}<br>Returns: %{y:,.0f}<extra></extra>"
+                });
+            }
+
+            /* Total refugees line on secondary y-axis */
+            var _totTS = (totalTS && totalTS.data && totalTS.data.timeseries) ? totalTS.data.timeseries : [];
+            if (_totTS.length > 0) {
+                var totSorted = _totTS.slice().sort(function (a, b) {
+                    return (a.data_date || "").localeCompare(b.data_date || "");
+                });
+                /* Deduplicate: keep the latest record per year */
+                var totByYear = {};
+                totSorted.forEach(function (r) {
+                    var yr = _tsYear(r);
+                    totByYear[yr] = r; /* last (most recent date) wins */
+                });
+                var dedupYears = Object.keys(totByYear).sort(function (a, b) { return a - b; });
+                var totYears = dedupYears.map(String);
+                var totVals = dedupYears.map(function (yr) { return (parseInt(totByYear[yr].individuals) || 0) / 1e6; });
+                tsTraces.push({
+                    x: totYears, y: totVals,
+                    mode: "lines+markers",
+                    name: "Total Refugees (M)",
+                    line: { color: "#42a5f5", width: 2.5, dash: "dot" },
+                    marker: { size: 6, symbol: "diamond" },
+                    yaxis: "y2",
+                    hovertemplate: "%{x}<br>Total Refugees: %{y:.2f}M<extra></extra>"
+                });
+            }
+
+            Plotly.newPlot("chart-ref-timeseries", tsTraces, applyTheme({
+                title: { text: "Resettlement, Returns & Total Refugees by Year", font: { size: 18 } },
+                yaxis: { title: "Resettlement / Returns", tickformat: ",d" },
+                yaxis2: { title: "Total Refugees (Millions)", overlaying: "y", side: "right", hoverformat: ".2f", rangemode: "tozero" },
+                xaxis: { title: "" },
+                height: 460,
+                margin: { l: 80, r: 80, t: 60, b: 40 },
+                hovermode: "x unified",
+                legend: { orientation: "h", y: -0.12 },
+                bargap: 0.35
+            }), PLOTLY_CFG);
+        }
+    }
+
+    /* ========== Init ========== */
     fetch("data/cpi_data.json?v=" + Date.now())
         .then(function (res) {
             if (!res.ok) throw new Error("Could not load data/cpi_data.json");
@@ -460,6 +1558,7 @@
         })
         .then(function (data) {
             _data = data;
+            updateFreshness(data);
 
             /* Populate CPI dropdowns */
             var regionSelect = document.getElementById("region-select");
@@ -502,10 +1601,17 @@
             wageCatSelect.addEventListener("change", renderWages);
             wageAreaSelect.addEventListener("change", renderWages);
 
-            /* Render initial views */
+            /* Remove skeleton loaders */
+            document.querySelectorAll(".tab-content").forEach(function (tc) {
+                tc.classList.remove("loading");
+            });
+
             renderCPI();
         })
         .catch(function (err) {
+            document.querySelectorAll(".tab-content").forEach(function (tc) {
+                tc.classList.remove("loading");
+            });
             document.querySelector(".tab-content.active .container").innerHTML =
                 '<div class="error-msg">\u26A0 ' + err.message +
                 '<br><small>Run the notebook first to generate data/cpi_data.json</small></div>';
